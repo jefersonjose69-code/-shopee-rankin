@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Shopee Ranking</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    header {
+      background: #ee4d2d;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 25px;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .topo {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 18px;
+      background: #ee4d2d;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #status {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .produtos {
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fill, minmax(250px, 1fr));
+      gap: 18px;
+    }
+
+    .produto {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .produto img {
+      width: 100%;
+      height: 230px;
+      object-fit: contain;
+      background: white;
+    }
+
+    .conteudo {
+      padding: 15px;
+    }
+
+    .produto h2 {
+      font-size: 16px;
+      line-height: 1.4;
+      margin: 0 0 12px;
+    }
+
+    .info {
+      margin: 7px 0;
+      font-size: 14px;
+    }
+
+    .destaque {
+      color: #ee4d2d;
+      font-weight: bold;
+    }
+
+    .comissao {
+      color: #008000;
+      font-weight: bold;
+    }
+
+    .link {
+      display: block;
+      text-align: center;
+      margin-top: 14px;
+      background: #ee4d2d;
+      color: white;
+      text-decoration: none;
+      padding: 11px;
+      border-radius: 7px;
+    }
+
+    .erro {
+      color: #c00;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 12px;
+      }
+
+      .produtos {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🛍️ Shopee Ranking</h1>
+    <p>Produtos mais vendidos para afiliados</p>
+  </header>
+
+  <main class="container">
+
+    <div class="topo">
+      <button onclick="carregarProdutos()">
+        🔄 Atualizar produtos
+      </button>
+    </div>
+
+    <div id="status">
+      ⏳ Carregando produtos...
+    </div>
+
+    <div
+      id="produtos"
+      class="produtos"
+    ></div>
+
+  </main>
+
+  <script>
+    async function carregarProdutos() {
+
+      const status =
+        document.getElementById("status");
+
+      const container =
+        document.getElementById("produtos");
+
+      status.innerHTML =
+        "⏳ Buscando produtos na Shopee...";
+
+      container.innerHTML = "";
+
+      try {
+
+        const resposta =
+          await fetch("/api/produtos");
+
+        const dados =
+          await resposta.json();
+
+        if (!dados.success) {
+          throw new Error(
+            dados.error || "Erro desconhecido"
+          );
+        }
+
+        const produtos =
+          dados.produtos || [];
+
+        status.innerHTML =
+          `✅ ${produtos.length} produtos encontrados`;
+
+        if (produtos.length === 0) {
+
+          container.innerHTML =
+            "<p>Nenhum produto encontrado.</p>";
+
+          return;
+        }
+
+        produtos.forEach((produto, index) => {
+
+          const nome =
+            produto.productName || "Produto";
+
+          const vendas =
+            Number(produto.sales || 0);
+
+          const taxa =
+            Number(
+              produto.commissionRate || 0
+            ) * 100;
+
+          const comissao =
+            Number(
+              produto.commission || 0
+            );
+
+          const precoMin =
+            Number(
+              produto.priceMin || 0
+            );
+
+          const precoMax =
+            Number(
+              produto.priceMax || 0
+            );
+
+          const avaliacao =
+            produto.ratingStar || 0;
+
+          const desconto =
+            Number(
+              produto.priceDiscountRate || 0
+            );
+
+          const imagem =
+            produto.imageUrl || "";
+
+          const link =
+            produto.offerLink ||
+            produto.productLink ||
+            "#";
+
+          const card =
+            document.createElement("div");
+
+          card.className = "produto";
+
+          card.innerHTML = `
+
+            <img
+              src="${imagem}"
+              alt="${nome}"
+              onerror="this.style.display='none'"
+            >
+
+            <div class="conteudo">
+
+              <h2>
+                #${index + 1} ${nome}
+              </h2>
+
+              <div class="info">
+                🛒 Vendas:
+                <span class="destaque">
+                  ${vendas.toLocaleString("pt-BR")}
+                </span>
+              </div>
+
+              <div class="info">
+                💰 Comissão:
+                <span class="comissao">
+                  ${taxa.toFixed(2)}%
+                </span>
+              </div>
+
+              <div class="info">
+                💵 Comissão estimada:
+                <span class="comissao">
+                  R$ ${comissao.toFixed(2)}
+                </span>
+              </div>
+
+              <div class="info">
+                💲 Preço:
+                R$ ${precoMin.toFixed(2)}
+                ${
+                  precoMax > precoMin
+                    ? " - R$ " +
+                      precoMax.toFixed(2)
+                    : ""
+                }
+              </div>
+
+              <div class="info">
+                ⭐ Avaliação:
+                ${avaliacao}
+              </div>
+
+              <div class="info">
+                🔥 Desconto:
+                ${desconto}%
+              </div>
+
+              <a
+                class="link"
+                href="${link}"
+                target="_blank"
+              >
+                🔗 Ver produto
+              </a>
+
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+
+      } catch (erro) {
+
+        console.error(erro);
+
+        status.innerHTML = `
+          <span class="erro">
+            ❌ Erro ao carregar produtos:
+            ${erro.message}
+          </span>
+        `;
+      }
+    }
+
+    carregarProdutos();
+  </script>
+
+</body>
+</html>
