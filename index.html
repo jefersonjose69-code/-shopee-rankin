@@ -2,11 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Shopee Ranking</title>
 
@@ -30,8 +26,8 @@
     }
 
     header h1 {
-      margin: 0 0 8px;
-      font-size: 25px;
+      margin: 0 0 6px;
+      font-size: 28px;
     }
 
     header p {
@@ -53,68 +49,44 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    .filtros h2 {
-      margin-top: 0;
-      font-size: 18px;
-    }
-
-    .campo {
-      margin-bottom: 12px;
-    }
-
-    .campo label {
-      display: block;
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 11px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 15px;
-      background: white;
-    }
-
-    .linha {
+    .filtros-grid {
       display: grid;
-      grid-template-columns:
-        repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 10px;
     }
 
+    input,
+    select,
     button {
       width: 100%;
-      border: 0;
-      border-radius: 8px;
       padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    button {
       background: #ee4d2d;
       color: white;
-      font-size: 15px;
+      border: none;
       cursor: pointer;
-      margin-top: 5px;
+      font-weight: bold;
     }
 
     button:hover {
       opacity: 0.9;
     }
 
-    #status {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
+    .info {
+      margin-top: 12px;
       font-size: 14px;
+      color: #555;
     }
 
     .produtos {
       display: grid;
-      grid-template-columns:
-        repeat(auto-fill, minmax(250px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 15px;
     }
 
     .produto {
@@ -122,66 +94,74 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
     }
 
     .produto img {
       width: 100%;
-      height: 230px;
+      height: 220px;
       object-fit: contain;
-      background: white;
+      background: #fafafa;
     }
 
     .conteudo {
-      padding: 15px;
+      padding: 14px;
     }
 
-    .produto h2 {
-      font-size: 16px;
+    .produto h3 {
+      font-size: 15px;
+      margin: 0 0 10px;
       line-height: 1.4;
-      margin: 0 0 12px;
     }
 
-    .info {
-      margin: 7px 0;
-      font-size: 14px;
+    .dados {
+      font-size: 13px;
+      line-height: 1.8;
     }
 
     .destaque {
-      color: #ee4d2d;
       font-weight: bold;
+      color: #ee4d2d;
     }
 
     .comissao {
-      color: #008000;
+      color: #159447;
       font-weight: bold;
     }
 
     .link {
       display: block;
+      margin-top: 12px;
       text-align: center;
-      margin-top: 14px;
       background: #ee4d2d;
       color: white;
       text-decoration: none;
-      padding: 11px;
-      border-radius: 7px;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
     }
 
-    .sem-produtos {
-      background: white;
-      padding: 25px;
+    .carregando,
+    .erro,
+    .vazio {
       text-align: center;
-      border-radius: 10px;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
     }
 
-    @media (max-width: 700px) {
+    .erro {
+      color: #c62828;
+    }
 
-      .linha {
-        grid-template-columns: 1fr;
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 23px;
       }
 
-      .produtos {
-        grid-template-columns: 1fr;
+      .produto img {
+        height: 200px;
       }
     }
   </style>
@@ -189,431 +169,366 @@
 
 <body>
 
-  <header>
-    <h1>🛍️ Shopee Ranking</h1>
-    <p>Produtos mais vendidos para afiliados</p>
-  </header>
+<header>
+  <h1>🛍️ Shopee Ranking</h1>
+  <p>Produtos mais vendidos para afiliados</p>
+</header>
 
-  <main class="container">
+<div class="container">
 
-    <section class="filtros">
+  <div class="filtros">
 
-      <h2>🔎 Filtros</h2>
+    <div class="filtros-grid">
 
-      <div class="campo">
+      <input
+        type="text"
+        id="pesquisa"
+        placeholder="🔎 Pesquisar produto..."
+      >
 
-        <label>
-          Pesquisar produto
-        </label>
+      <input
+        type="number"
+        id="vendasMinimas"
+        placeholder="🔥 Vendas mínimas"
+        min="0"
+      >
 
-        <input
-          id="pesquisa"
-          type="text"
-          placeholder="Ex.: tênis, celular, cozinha..."
-          oninput="aplicarFiltros()"
-        >
+      <input
+        type="number"
+        id="comissaoMinima"
+        placeholder="💰 Comissão mínima (%)"
+        min="0"
+        step="0.1"
+      >
 
-      </div>
-
-      <div class="linha">
-
-        <div class="campo">
-
-          <label>
-            Mínimo de vendas
-          </label>
-
-          <input
-            id="minVendas"
-            type="number"
-            min="0"
-            value="0"
-            oninput="aplicarFiltros()"
-          >
-
-        </div>
-
-        <div class="campo">
-
-          <label>
-            Comissão mínima (%)
-          </label>
-
-          <input
-            id="minComissao"
-            type="number"
-            min="0"
-            step="0.1"
-            value="0"
-            oninput="aplicarFiltros()"
-          >
-
-        </div>
-
-        <div class="campo">
-
-          <label>
-            Ordenar por
-          </label>
-
-          <select
-            id="ordenacao"
-            onchange="aplicarFiltros()"
-          >
-
-            <option value="vendas">
-              🔥 Mais vendidos
-            </option>
-
-            <option value="comissao">
-              💰 Maior comissão
-            </option>
-
-            <option value="valorComissao">
-              💵 Maior valor de comissão
-            </option>
-
-            <option value="precoMenor">
-              💲 Menor preço
-            </option>
-
-            <option value="avaliacao">
-              ⭐ Melhor avaliação
-            </option>
-
-          </select>
-
-        </div>
-
-      </div>
+      <select id="ordenacao">
+        <option value="vendas">🔥 Mais vendidos</option>
+        <option value="comissao">💰 Maior comissão (%)</option>
+        <option value="valorComissao">💵 Maior valor de comissão</option>
+        <option value="precoMenor">💲 Menor preço</option>
+        <option value="avaliacao">⭐ Melhor avaliação</option>
+      </select>
 
       <button onclick="carregarProdutos()">
         🔄 Atualizar produtos
       </button>
 
-    </section>
-
-    <div id="status">
-      ⏳ Carregando produtos...
     </div>
 
-    <div
-      id="produtos"
-      class="produtos"
-    ></div>
+    <div class="info" id="info">
+      Carregando produtos...
+    </div>
 
-  </main>
+  </div>
 
-  <script>
+  <div id="resultado" class="carregando">
+    Carregando produtos...
+  </div>
 
-    let todosProdutos = [];
+</div>
 
-    async function carregarProdutos() {
+<script>
 
-      const status =
-        document.getElementById("status");
+let todosProdutos = [];
 
-      status.innerHTML =
-        "⏳ Buscando produtos na Shopee...";
+async function carregarProdutos() {
 
-      try {
+  const resultado = document.getElementById("resultado");
+  const info = document.getElementById("info");
 
-        const resposta =
-          await fetch("/api/produtos");
+  resultado.className = "carregando";
+  resultado.innerHTML = "⏳ Carregando produtos...";
 
-        const dados =
-          await resposta.json();
+  try {
 
-        if (!dados.success) {
+    const resposta = await fetch("/api/produtos");
 
-          throw new Error(
-            dados.error ||
-            "Erro desconhecido"
-          );
+    const dados = await resposta.json();
 
-        }
+    if (!dados.success) {
+      throw new Error(dados.error || "Erro ao carregar produtos");
+    }
 
-        todosProdutos =
-          dados.produtos || [];
+    todosProdutos = dados.produtos || [];
 
-        status.innerHTML =
-          `✅ ${todosProdutos.length} produtos carregados`;
+    aplicarFiltros();
 
-        aplicarFiltros();
+  } catch (erro) {
 
-      } catch (erro) {
+    console.error(erro);
 
-        console.error(erro);
+    resultado.className = "erro";
 
-        status.innerHTML =
-          `❌ Erro: ${erro.message}`;
+    resultado.innerHTML =
+      "❌ Erro ao carregar produtos.<br><br>" +
+      erro.message;
 
-      }
+    info.innerText = "";
+
+  }
+}
+
+
+function aplicarFiltros() {
+
+  const pesquisa =
+    document.getElementById("pesquisa").value
+      .toLowerCase()
+      .trim();
+
+  const vendasMinimas =
+    Number(
+      document.getElementById("vendasMinimas").value
+    ) || 0;
+
+  const comissaoMinima =
+    Number(
+      document.getElementById("comissaoMinima").value
+    ) || 0;
+
+  const ordenacao =
+    document.getElementById("ordenacao").value;
+
+
+  let produtos = todosProdutos.filter(produto => {
+
+    const nome =
+      String(produto.productName || "")
+        .toLowerCase();
+
+    const vendas =
+      Number(produto.sales || 0);
+
+    const comissao =
+      Number(produto.commissionRate || 0) * 100;
+
+    const correspondePesquisa =
+      !pesquisa ||
+      nome.includes(pesquisa);
+
+    const correspondeVendas =
+      vendas >= vendasMinimas;
+
+    const correspondeComissao =
+      comissao >= comissaoMinima;
+
+    return (
+      correspondePesquisa &&
+      correspondeVendas &&
+      correspondeComissao
+    );
+
+  });
+
+
+  produtos.sort((a, b) => {
+
+    if (ordenacao === "vendas") {
+
+      return Number(b.sales || 0) -
+             Number(a.sales || 0);
 
     }
 
-    function aplicarFiltros() {
+    if (ordenacao === "comissao") {
 
-      const pesquisa =
-        document
-          .getElementById("pesquisa")
-          .value
-          .toLowerCase()
-          .trim();
-
-      const minVendas =
-        Number(
-          document
-            .getElementById("minVendas")
-            .value
-        ) || 0;
-
-      const minComissao =
-        Number(
-          document
-            .getElementById("minComissao")
-            .value
-        ) || 0;
-
-      const ordenacao =
-        document
-          .getElementById("ordenacao")
-          .value;
-
-      let produtos =
-        todosProdutos.filter(produto => {
-
-          const nome =
-            (
-              produto.productName || ""
-            ).toLowerCase();
-
-          const vendas =
-            Number(
-              produto.sales || 0
-            );
-
-          const comissao =
-            Number(
-              produto.commissionRate || 0
-            ) * 100;
-
-          const correspondePesquisa =
-            !pesquisa ||
-            nome.includes(pesquisa);
-
-          return (
-            correspondePesquisa &&
-            vendas >= minVendas &&
-            comissao >= minComissao
-          );
-
-        });
-
-      produtos.sort((a, b) => {
-
-        if (ordenacao === "vendas") {
-
-          return (
-            Number(b.sales || 0) -
-            Number(a.sales || 0)
-          );
-
-        }
-
-        if (ordenacao === "comissao") {
-
-          return (
-            Number(b.commissionRate || 0) -
-            Number(a.commissionRate || 0)
-          );
-
-        }
-
-        if (ordenacao === "valorComissao") {
-
-          return (
-            Number(b.commission || 0) -
-            Number(a.commission || 0)
-          );
-
-        }
-
-        if (ordenacao === "precoMenor") {
-
-          return (
-            Number(a.priceMin || 0) -
-            Number(b.priceMin || 0)
-          );
-
-        }
-
-        if (ordenacao === "avaliacao") {
-
-          return (
-            Number(b.ratingStar || 0) -
-            Number(a.ratingStar || 0)
-          );
-
-        }
-
-        return 0;
-
-      });
-
-      mostrarProdutos(produtos);
-
-      document.getElementById("status").innerHTML =
-        `📊 ${produtos.length} produtos encontrados`;
+      return Number(b.commissionRate || 0) -
+             Number(a.commissionRate || 0);
 
     }
 
-    function mostrarProdutos(produtos) {
+    if (ordenacao === "valorComissao") {
 
-      const container =
-        document.getElementById("produtos");
+      return Number(b.commission || 0) -
+             Number(a.commission || 0);
 
-      container.innerHTML = "";
+    }
 
-      if (produtos.length === 0) {
+    if (ordenacao === "precoMenor") {
 
-        container.innerHTML = `
-          <div class="sem-produtos">
-            😕 Nenhum produto corresponde aos filtros.
-          </div>
-        `;
+      return Number(a.priceMin || 0) -
+             Number(b.priceMin || 0);
 
-        return;
+    }
+
+    if (ordenacao === "avaliacao") {
+
+      return Number(b.ratingStar || 0) -
+             Number(a.ratingStar || 0);
+
+    }
+
+    return 0;
+
+  });
+
+
+  mostrarProdutos(produtos);
+
+}
+
+
+function mostrarProdutos(produtos) {
+
+  const resultado =
+    document.getElementById("resultado");
+
+  const info =
+    document.getElementById("info");
+
+
+  info.innerText =
+    `${produtos.length} produto(s) encontrado(s)`;
+
+
+  if (produtos.length === 0) {
+
+    resultado.className = "vazio";
+
+    resultado.innerHTML =
+      "😕 Nenhum produto encontrado.";
+
+    return;
+
+  }
+
+
+  resultado.className = "produtos";
+
+
+  resultado.innerHTML =
+    produtos.map((produto, index) => {
+
+      const vendas =
+        Number(produto.sales || 0);
+
+      const comissao =
+        Number(produto.commissionRate || 0) * 100;
+
+      const valorComissao =
+        Number(produto.commission || 0);
+
+      const precoMin =
+        Number(produto.priceMin || 0);
+
+      const precoMax =
+        Number(produto.priceMax || 0);
+
+      const avaliacao =
+        Number(produto.ratingStar || 0);
+
+      const desconto =
+        Number(produto.priceDiscountRate || 0);
+
+
+      let precoTexto =
+        `R$ ${precoMin.toFixed(2)}`;
+
+      if (precoMax > precoMin) {
+
+        precoTexto +=
+          ` - R$ ${precoMax.toFixed(2)}`;
+
       }
 
-      produtos.forEach((produto, index) => {
 
-        const nome =
-          produto.productName ||
-          "Produto";
+      return `
 
-        const vendas =
-          Number(
-            produto.sales || 0
-          );
-
-        const taxa =
-          Number(
-            produto.commissionRate || 0
-          ) * 100;
-
-        const comissao =
-          Number(
-            produto.commission || 0
-          );
-
-        const precoMin =
-          Number(
-            produto.priceMin || 0
-          );
-
-        const precoMax =
-          Number(
-            produto.priceMax || 0
-          );
-
-        const avaliacao =
-          produto.ratingStar || 0;
-
-        const desconto =
-          Number(
-            produto.priceDiscountRate || 0
-          );
-
-        const imagem =
-          produto.imageUrl || "";
-
-        const link =
-          produto.offerLink ||
-          produto.productLink ||
-          "#";
-
-        const card =
-          document.createElement("div");
-
-        card.className = "produto";
-
-        card.innerHTML = `
+        <div class="produto">
 
           <img
-            src="${imagem}"
-            alt="${nome}"
-            onerror="this.style.display='none'"
+            src="${produto.imageUrl || ""}"
+            alt="${produto.productName || "Produto"}"
+            loading="lazy"
           >
 
           <div class="conteudo">
 
-            <h2>
-              #${index + 1} ${nome}
-            </h2>
+            <h3>
+              ${index + 1}. ${produto.productName || "Produto sem nome"}
+            </h3>
 
-            <div class="info">
-              🛒 Vendas:
+            <div class="dados">
+
+              🔥 Vendas:
               <span class="destaque">
                 ${vendas.toLocaleString("pt-BR")}
               </span>
-            </div>
+              <br>
 
-            <div class="info">
               💰 Comissão:
               <span class="comissao">
-                ${taxa.toFixed(2)}%
+                ${comissao.toFixed(2)}%
               </span>
-            </div>
+              <br>
 
-            <div class="info">
-              💵 Comissão estimada:
+              💵 Valor comissão:
               <span class="comissao">
-                R$ ${comissao.toFixed(2)}
+                R$ ${valorComissao.toFixed(2)}
               </span>
-            </div>
+              <br>
 
-            <div class="info">
               💲 Preço:
-              R$ ${precoMin.toFixed(2)}
-              ${
-                precoMax > precoMin
-                  ? " - R$ " +
-                    precoMax.toFixed(2)
-                  : ""
-              }
-            </div>
+              ${precoTexto}
+              <br>
 
-            <div class="info">
               ⭐ Avaliação:
-              ${avaliacao}
-            </div>
+              ${avaliacao.toFixed(1)}
+              <br>
 
-            <div class="info">
-              🔥 Desconto:
-              ${desconto}%
+              🏷️ Desconto:
+              ${desconto.toFixed(0)}%
+              <br>
+
+              🏪 Loja:
+              ${produto.shopName || "Não informado"}
+
             </div>
 
             <a
               class="link"
-              href="${link}"
+              href="${produto.offerLink || produto.productLink || "#"}"
               target="_blank"
+              rel="noopener noreferrer"
             >
-              🔗 Ver produto
+              🛒 Ver produto / Afiliado
             </a>
 
           </div>
-        `;
 
-        container.appendChild(card);
+        </div>
 
-      });
+      `;
 
-    }
+    }).join("");
 
-    carregarProdutos();
+}
 
-  </script>
+
+// Filtros atualizam automaticamente
+
+document
+  .getElementById("pesquisa")
+  .addEventListener("input", aplicarFiltros);
+
+document
+  .getElementById("vendasMinimas")
+  .addEventListener("input", aplicarFiltros);
+
+document
+  .getElementById("comissaoMinima")
+  .addEventListener("input", aplicarFiltros);
+
+document
+  .getElementById("ordenacao")
+  .addEventListener("change", aplicarFiltros);
+
+
+// Carregar ao abrir
+
+carregarProdutos();
+
+</script>
 
 </body>
 </html>
