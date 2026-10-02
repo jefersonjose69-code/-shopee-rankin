@@ -73,10 +73,6 @@
       font-weight: bold;
     }
 
-    button:hover {
-      opacity: 0.9;
-    }
-
     .info {
       margin-top: 12px;
       font-size: 14px;
@@ -201,6 +197,14 @@
         step="0.1"
       >
 
+      <input
+        type="number"
+        id="precoMaximo"
+        placeholder="💵 Preço máximo (R$)"
+        min="0"
+        step="0.01"
+      >
+
       <select id="ordenacao">
         <option value="vendas">🔥 Mais vendidos</option>
         <option value="comissao">💰 Maior comissão (%)</option>
@@ -286,6 +290,14 @@ function aplicarFiltros() {
       document.getElementById("comissaoMinima").value
     ) || 0;
 
+  const precoMaximoCampo =
+    document.getElementById("precoMaximo").value;
+
+  const precoMaximo =
+    precoMaximoCampo === ""
+      ? Infinity
+      : Number(precoMaximoCampo);
+
   const ordenacao =
     document.getElementById("ordenacao").value;
 
@@ -302,6 +314,9 @@ function aplicarFiltros() {
     const comissao =
       Number(produto.commissionRate || 0) * 100;
 
+    const preco =
+      Number(produto.priceMin || 0);
+
     const correspondePesquisa =
       !pesquisa ||
       nome.includes(pesquisa);
@@ -312,10 +327,14 @@ function aplicarFiltros() {
     const correspondeComissao =
       comissao >= comissaoMinima;
 
+    const correspondePreco =
+      preco <= precoMaximo;
+
     return (
       correspondePesquisa &&
       correspondeVendas &&
-      correspondeComissao
+      correspondeComissao &&
+      correspondePreco
     );
 
   });
@@ -505,8 +524,6 @@ function mostrarProdutos(produtos) {
 }
 
 
-// Filtros atualizam automaticamente
-
 document
   .getElementById("pesquisa")
   .addEventListener("input", aplicarFiltros);
@@ -520,11 +537,13 @@ document
   .addEventListener("input", aplicarFiltros);
 
 document
+  .getElementById("precoMaximo")
+  .addEventListener("input", aplicarFiltros);
+
+document
   .getElementById("ordenacao")
   .addEventListener("change", aplicarFiltros);
 
-
-// Carregar ao abrir
 
 carregarProdutos();
 
