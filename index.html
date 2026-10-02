@@ -7,6 +7,7 @@
   <title>Shopee Ranking</title>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -51,7 +52,10 @@
 
     .filtros-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(
+        auto-fit,
+        minmax(180px, 1fr)
+      );
       gap: 10px;
     }
 
@@ -88,7 +92,8 @@
 
     .produtos {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      grid-template-columns:
+        repeat(auto-fill, minmax(240px, 1fr));
       gap: 15px;
     }
 
@@ -96,7 +101,8 @@
       background: white;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
     }
@@ -131,6 +137,39 @@
     .comissao {
       color: #159447;
       font-weight: bold;
+    }
+
+    /* ===============================
+       INDICADORES
+    =============================== */
+
+    .indicador {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 7px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .indicador-alta {
+      background: #d9f7e3;
+      color: #08752f;
+    }
+
+    .indicador-boa {
+      background: #fff3c4;
+      color: #8a6500;
+    }
+
+    .indicador-volume {
+      background: #dcecff;
+      color: #1558a6;
+    }
+
+    .indicador-outros {
+      background: #eeeeee;
+      color: #666666;
     }
 
     .link {
@@ -190,7 +229,9 @@
       }
 
     }
+
   </style>
+
 </head>
 
 <body>
@@ -274,7 +315,6 @@
 
     </div>
 
-
     <div
       class="info"
       id="info"
@@ -307,13 +347,19 @@ let todosProdutos = [];
 async function carregarProdutos() {
 
   const resultado =
-    document.getElementById("resultado");
+    document.getElementById(
+      "resultado"
+    );
 
   const info =
-    document.getElementById("info");
+    document.getElementById(
+      "info"
+    );
 
 
-  resultado.className = "carregando";
+  resultado.className =
+    "carregando";
+
 
   resultado.innerHTML =
     "⏳ Carregando produtos...";
@@ -322,7 +368,9 @@ async function carregarProdutos() {
   try {
 
     const resposta =
-      await fetch("/api/produtos");
+      await fetch(
+        "/api/produtos"
+      );
 
 
     const dados =
@@ -368,6 +416,76 @@ async function carregarProdutos() {
 
 
 /* ==========================================
+   DEFINIR INDICADOR
+========================================== */
+
+function definirIndicador(
+  vendas,
+  comissao
+) {
+
+  /*
+    Alta combinação:
+    500+ vendas + 20%+ comissão
+  */
+
+  if (
+    vendas >= 500 &&
+    comissao >= 20
+  ) {
+
+    return {
+      classe: "indicador-alta",
+      texto: "🟢 Alta combinação"
+    };
+
+  }
+
+
+  /*
+    Boa combinação:
+    100+ vendas + 10%+ comissão
+  */
+
+  if (
+    vendas >= 100 &&
+    comissao >= 10
+  ) {
+
+    return {
+      classe: "indicador-boa",
+      texto: "🟡 Boa combinação"
+    };
+
+  }
+
+
+  /*
+    Volume alto:
+    1.000+ vendas
+  */
+
+  if (
+    vendas >= 1000
+  ) {
+
+    return {
+      classe: "indicador-volume",
+      texto: "🔵 Volume alto"
+    };
+
+  }
+
+
+  return {
+    classe: "indicador-outros",
+    texto: "⚪ Outros"
+  };
+
+}
+
+
+/* ==========================================
    APLICAR FILTROS
 ========================================== */
 
@@ -375,7 +493,9 @@ function aplicarFiltros() {
 
   const pesquisa =
     document
-      .getElementById("pesquisa")
+      .getElementById(
+        "pesquisa"
+      )
       .value
       .toLowerCase()
       .trim();
@@ -406,7 +526,9 @@ function aplicarFiltros() {
   const precoMaximo =
     precoMaximoCampo === ""
       ? Infinity
-      : Number(precoMaximoCampo);
+      : Number(
+          precoMaximoCampo
+        );
 
 
   const ordenacao =
@@ -416,137 +538,169 @@ function aplicarFiltros() {
 
 
   let produtos =
-    todosProdutos.filter(produto => {
+    todosProdutos.filter(
+      produto => {
 
 
-      const nome =
-        String(
-          produto.productName || ""
-        ).toLowerCase();
+        const nome =
+          String(
+            produto.productName || ""
+          ).toLowerCase();
 
 
-      const vendas =
-        Number(
-          produto.sales || 0
+        const vendas =
+          Number(
+            produto.sales || 0
+          );
+
+
+        const comissao =
+          Number(
+            produto.commissionRate || 0
+          ) * 100;
+
+
+        const preco =
+          Number(
+            produto.priceMin || 0
+          );
+
+
+        const correspondePesquisa =
+          !pesquisa ||
+          nome.includes(
+            pesquisa
+          );
+
+
+        const correspondeVendas =
+          vendas >=
+          vendasMinimas;
+
+
+        const correspondeComissao =
+          comissao >=
+          comissaoMinima;
+
+
+        const correspondePreco =
+          preco <=
+          precoMaximo;
+
+
+        return (
+          correspondePesquisa &&
+          correspondeVendas &&
+          correspondeComissao &&
+          correspondePreco
         );
 
-
-      const comissao =
-        Number(
-          produto.commissionRate || 0
-        ) * 100;
-
-
-      const preco =
-        Number(
-          produto.priceMin || 0
-        );
-
-
-      const correspondePesquisa =
-        !pesquisa ||
-        nome.includes(pesquisa);
-
-
-      const correspondeVendas =
-        vendas >= vendasMinimas;
-
-
-      const correspondeComissao =
-        comissao >= comissaoMinima;
-
-
-      const correspondePreco =
-        preco <= precoMaximo;
-
-
-      return (
-        correspondePesquisa &&
-        correspondeVendas &&
-        correspondeComissao &&
-        correspondePreco
-      );
-
-    });
+      }
+    );
 
 
   /* ========================================
      ORDENAÇÃO
   ======================================== */
 
-  produtos.sort((a, b) => {
+  produtos.sort(
+    (a, b) => {
 
 
-    if (
-      ordenacao === "vendas"
-    ) {
+      if (
+        ordenacao ===
+        "vendas"
+      ) {
 
-      return (
-        Number(b.sales || 0) -
-        Number(a.sales || 0)
-      );
+        return (
+          Number(
+            b.sales || 0
+          ) -
+          Number(
+            a.sales || 0
+          )
+        );
+
+      }
+
+
+      if (
+        ordenacao ===
+        "comissao"
+      ) {
+
+        return (
+          Number(
+            b.commissionRate || 0
+          ) -
+          Number(
+            a.commissionRate || 0
+          )
+        );
+
+      }
+
+
+      if (
+        ordenacao ===
+        "valorComissao"
+      ) {
+
+        return (
+          Number(
+            b.commission || 0
+          ) -
+          Number(
+            a.commission || 0
+          )
+        );
+
+      }
+
+
+      if (
+        ordenacao ===
+        "precoMenor"
+      ) {
+
+        return (
+          Number(
+            a.priceMin || 0
+          ) -
+          Number(
+            b.priceMin || 0
+          )
+        );
+
+      }
+
+
+      if (
+        ordenacao ===
+        "avaliacao"
+      ) {
+
+        return (
+          Number(
+            b.ratingStar || 0
+          ) -
+          Number(
+            a.ratingStar || 0
+          )
+        );
+
+      }
+
+
+      return 0;
 
     }
+  );
 
 
-    if (
-      ordenacao === "comissao"
-    ) {
-
-      return (
-        Number(
-          b.commissionRate || 0
-        ) -
-        Number(
-          a.commissionRate || 0
-        )
-      );
-
-    }
-
-
-    if (
-      ordenacao === "valorComissao"
-    ) {
-
-      return (
-        Number(b.commission || 0) -
-        Number(a.commission || 0)
-      );
-
-    }
-
-
-    if (
-      ordenacao === "precoMenor"
-    ) {
-
-      return (
-        Number(a.priceMin || 0) -
-        Number(b.priceMin || 0)
-      );
-
-    }
-
-
-    if (
-      ordenacao === "avaliacao"
-    ) {
-
-      return (
-        Number(b.ratingStar || 0) -
-        Number(a.ratingStar || 0)
-      );
-
-    }
-
-
-    return 0;
-
-  });
-
-
-  mostrarProdutos(produtos);
+  mostrarProdutos(
+    produtos
+  );
 
 }
 
@@ -555,7 +709,9 @@ function aplicarFiltros() {
    MOSTRAR PRODUTOS
 ========================================== */
 
-function mostrarProdutos(produtos) {
+function mostrarProdutos(
+  produtos
+) {
 
   const resultado =
     document.getElementById(
@@ -595,181 +751,236 @@ function mostrarProdutos(produtos) {
 
 
   resultado.innerHTML =
-    produtos.map(
-      (produto, index) => {
+    produtos
+      .map(
+        (produto, index) => {
 
 
-        const vendas =
-          Number(
-            produto.sales || 0
-          );
+          const vendas =
+            Number(
+              produto.sales || 0
+            );
 
 
-        const comissao =
-          Number(
-            produto.commissionRate || 0
-          ) * 100;
+          const comissao =
+            Number(
+              produto.commissionRate || 0
+            ) * 100;
 
 
-        const valorComissao =
-          Number(
-            produto.commission || 0
-          );
+          const valorComissao =
+            Number(
+              produto.commission || 0
+            );
 
 
-        const precoMin =
-          Number(
-            produto.priceMin || 0
-          );
+          const precoMin =
+            Number(
+              produto.priceMin || 0
+            );
 
 
-        const precoMax =
-          Number(
-            produto.priceMax || 0
-          );
+          const precoMax =
+            Number(
+              produto.priceMax || 0
+            );
 
 
-        const avaliacao =
-          Number(
-            produto.ratingStar || 0
-          );
+          const avaliacao =
+            Number(
+              produto.ratingStar || 0
+            );
 
 
-        const desconto =
-          Number(
-            produto.priceDiscountRate || 0
-          );
+          const desconto =
+            Number(
+              produto.priceDiscountRate || 0
+            );
 
 
-        const linkAfiliado =
-          produto.offerLink ||
-          produto.productLink ||
-          "";
+          const linkAfiliado =
+            produto.offerLink ||
+            produto.productLink ||
+            "";
 
 
-        let precoTexto =
-          `R$ ${precoMin.toFixed(2)}`;
+          const indicador =
+            definirIndicador(
+              vendas,
+              comissao
+            );
 
 
-        if (
-          precoMax > precoMin
-        ) {
-
-          precoTexto +=
-            ` - R$ ${precoMax.toFixed(2)}`;
-
-        }
+          let precoTexto =
+            `R$ ${precoMin.toFixed(2)}`;
 
 
-        return `
+          if (
+            precoMax >
+            precoMin
+          ) {
 
-          <div class="produto">
+            precoTexto +=
+              ` - R$ ${precoMax.toFixed(2)}`;
 
-            <img
-              src="${produto.imageUrl || ""}"
-              alt="${produto.productName || "Produto"}"
-              loading="lazy"
-            >
-
-
-            <div class="conteudo">
-
-              <h3>
-                ${index + 1}.
-                ${produto.productName || "Produto sem nome"}
-              </h3>
+          }
 
 
-              <div class="dados">
+          return `
 
-                🔥 Vendas:
-                <span class="destaque">
-                  ${vendas.toLocaleString("pt-BR")}
-                </span>
+            <div class="produto">
 
-                <br>
-
-
-                💰 Comissão:
-                <span class="comissao">
-                  ${comissao.toFixed(2)}%
-                </span>
-
-                <br>
+              <img
+                src="${produto.imageUrl || ""}"
+                alt="${produto.productName || "Produto"}"
+                loading="lazy"
+              >
 
 
-                💵 Valor comissão:
-                <span class="comissao">
-                  R$ ${valorComissao.toFixed(2)}
-                </span>
+              <div class="conteudo">
 
-                <br>
-
-
-                💲 Preço:
-                ${precoTexto}
-
-                <br>
+                <div
+                  class="indicador ${indicador.classe}"
+                >
+                  ${indicador.texto}
+                </div>
 
 
-                ⭐ Avaliação:
-                ${avaliacao.toFixed(1)}
+                <h3>
 
-                <br>
+                  ${index + 1}.
+                  ${produto.productName || "Produto sem nome"}
 
-
-                🏷️ Desconto:
-                ${desconto.toFixed(0)}%
-
-                <br>
+                </h3>
 
 
-                🏪 Loja:
-                ${produto.shopName || "Não informado"}
+                <div class="dados">
+
+                  🔥 Vendas:
+
+                  <span class="destaque">
+
+                    ${vendas.toLocaleString("pt-BR")}
+
+                  </span>
+
+                  <br>
+
+
+                  💰 Comissão:
+
+                  <span class="comissao">
+
+                    ${comissao.toFixed(2)}%
+
+                  </span>
+
+                  <br>
+
+
+                  💵 Valor comissão:
+
+                  <span class="comissao">
+
+                    R$ ${valorComissao.toFixed(2)}
+
+                  </span>
+
+                  <br>
+
+
+                  💲 Preço:
+
+                  ${precoTexto}
+
+                  <br>
+
+
+                  ⭐ Avaliação:
+
+                  ${avaliacao.toFixed(1)}
+
+                  <br>
+
+
+                  🏷️ Desconto:
+
+                  ${desconto.toFixed(0)}%
+
+                  <br>
+
+
+                  🏪 Loja:
+
+                  ${produto.shopName || "Não informado"}
+
+                </div>
+
+
+                <a
+                  class="link"
+                  href="${linkAfiliado || "#"}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+
+                  🛒 Ver produto / Afiliado
+
+                </a>
+
+
+                <button
+                  class="copiar-link"
+                  onclick="copiarLink(
+                    this,
+                    '${escaparAtributo(linkAfiliado)}'
+                  )"
+                >
+
+                  🔗 Copiar link de afiliado
+
+                </button>
 
               </div>
 
-
-              <a
-                class="link"
-                href="${linkAfiliado || "#"}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                🛒 Ver produto / Afiliado
-              </a>
-
-
-              <button
-                class="copiar-link"
-                onclick="copiarLink(this, '${escaparAtributo(linkAfiliado)}')"
-              >
-                🔗 Copiar link de afiliado
-              </button>
-
             </div>
 
-          </div>
+          `;
 
-        `;
-
-      }
-    ).join("");
+        }
+      )
+      .join("");
 
 }
 
 
 /* ==========================================
-   ESCAPAR TEXTO DO LINK
+   ESCAPAR LINK
 ========================================== */
 
-function escaparAtributo(texto) {
+function escaparAtributo(
+  texto
+) {
 
-  return String(texto || "")
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'")
-    .replace(/\n/g, "\\n")
-    .replace(/\r/g, "\\r");
+  return String(
+    texto || ""
+  )
+    .replace(
+      /\\/g,
+      "\\\\"
+    )
+    .replace(
+      /'/g,
+      "\\'"
+    )
+    .replace(
+      /\n/g,
+      "\\n"
+    )
+    .replace(
+      /\r/g,
+      "\\r"
+    );
 
 }
 
@@ -796,9 +1007,11 @@ async function copiarLink(
 
   try {
 
-    await navigator.clipboard.writeText(
-      link
-    );
+    await navigator
+      .clipboard
+      .writeText(
+        link
+      );
 
 
     const textoOriginal =
@@ -813,25 +1026,27 @@ async function copiarLink(
       "#0b7d3b";
 
 
-    setTimeout(() => {
+    setTimeout(
+      () => {
 
-      botao.innerText =
-        textoOriginal;
+        botao.innerText =
+          textoOriginal;
 
 
-      botao.style.background =
-        "#159447";
+        botao.style.background =
+          "#159447";
 
-    }, 2000);
+      },
+      2000
+    );
 
 
   } catch (erro) {
 
-    console.error(erro);
+    console.error(
+      erro
+    );
 
-
-    /* Alternativa para navegadores
-       que bloqueiam clipboard */
 
     try {
 
@@ -841,11 +1056,13 @@ async function copiarLink(
         );
 
 
-      campo.value = link;
+      campo.value =
+        link;
 
 
       campo.style.position =
         "fixed";
+
 
       campo.style.left =
         "-9999px";
@@ -873,12 +1090,15 @@ async function copiarLink(
         "✅ Link copiado!";
 
 
-      setTimeout(() => {
+      setTimeout(
+        () => {
 
-        botao.innerText =
-          "🔗 Copiar link de afiliado";
+          botao.innerText =
+            "🔗 Copiar link de afiliado";
 
-      }, 2000);
+        },
+        2000
+      );
 
 
     } catch (erro2) {
@@ -895,11 +1115,13 @@ async function copiarLink(
 
 
 /* ==========================================
-   EVENTOS DOS FILTROS
+   EVENTOS
 ========================================== */
 
 document
-  .getElementById("pesquisa")
+  .getElementById(
+    "pesquisa"
+  )
   .addEventListener(
     "input",
     aplicarFiltros
@@ -907,7 +1129,9 @@ document
 
 
 document
-  .getElementById("vendasMinimas")
+  .getElementById(
+    "vendasMinimas"
+  )
   .addEventListener(
     "input",
     aplicarFiltros
@@ -915,7 +1139,9 @@ document
 
 
 document
-  .getElementById("comissaoMinima")
+  .getElementById(
+    "comissaoMinima"
+  )
   .addEventListener(
     "input",
     aplicarFiltros
@@ -923,7 +1149,9 @@ document
 
 
 document
-  .getElementById("precoMaximo")
+  .getElementById(
+    "precoMaximo"
+  )
   .addEventListener(
     "input",
     aplicarFiltros
@@ -931,7 +1159,9 @@ document
 
 
 document
-  .getElementById("ordenacao")
+  .getElementById(
+    "ordenacao"
+  )
   .addEventListener(
     "change",
     aplicarFiltros
