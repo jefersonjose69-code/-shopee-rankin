@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
+const path = require("path");
 
 const app = express();
 
@@ -72,11 +73,13 @@ async function shopeeRequest(query) {
   return data;
 }
 
+/*
+  IMPORTANTE:
+  O index.html fica na raiz do projeto.
+  Esta linha faz o Render entregar a página.
+*/
 app.get("/", (req, res) => {
-  res.json({
-    status: "online",
-    message: "Shopee Ranking API funcionando"
-  });
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.get("/api/produtos", async (req, res) => {
