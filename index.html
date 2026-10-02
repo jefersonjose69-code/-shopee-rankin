@@ -40,26 +40,62 @@
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: auto;
-      padding: 20px;
+      padding: 15px;
     }
 
-    .topo {
-      display: flex;
-      gap: 10px;
+    .filtros {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
       margin-bottom: 20px;
-      flex-wrap: wrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .filtros h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    .campo {
+      margin-bottom: 12px;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      background: white;
+    }
+
+    .linha {
+      display: grid;
+      grid-template-columns:
+        repeat(3, 1fr);
+      gap: 10px;
     }
 
     button {
+      width: 100%;
       border: 0;
       border-radius: 8px;
-      padding: 12px 18px;
+      padding: 12px;
       background: #ee4d2d;
       color: white;
       font-size: 15px;
       cursor: pointer;
+      margin-top: 5px;
     }
 
     button:hover {
@@ -71,6 +107,7 @@
       padding: 15px;
       border-radius: 10px;
       margin-bottom: 20px;
+      font-size: 14px;
     }
 
     .produtos {
@@ -130,14 +167,17 @@
       border-radius: 7px;
     }
 
-    .erro {
-      color: #c00;
-      font-weight: bold;
+    .sem-produtos {
+      background: white;
+      padding: 25px;
+      text-align: center;
+      border-radius: 10px;
     }
 
-    @media (max-width: 600px) {
-      .container {
-        padding: 12px;
+    @media (max-width: 700px) {
+
+      .linha {
+        grid-template-columns: 1fr;
       }
 
       .produtos {
@@ -156,11 +196,102 @@
 
   <main class="container">
 
-    <div class="topo">
+    <section class="filtros">
+
+      <h2>🔎 Filtros</h2>
+
+      <div class="campo">
+
+        <label>
+          Pesquisar produto
+        </label>
+
+        <input
+          id="pesquisa"
+          type="text"
+          placeholder="Ex.: tênis, celular, cozinha..."
+          oninput="aplicarFiltros()"
+        >
+
+      </div>
+
+      <div class="linha">
+
+        <div class="campo">
+
+          <label>
+            Mínimo de vendas
+          </label>
+
+          <input
+            id="minVendas"
+            type="number"
+            min="0"
+            value="0"
+            oninput="aplicarFiltros()"
+          >
+
+        </div>
+
+        <div class="campo">
+
+          <label>
+            Comissão mínima (%)
+          </label>
+
+          <input
+            id="minComissao"
+            type="number"
+            min="0"
+            step="0.1"
+            value="0"
+            oninput="aplicarFiltros()"
+          >
+
+        </div>
+
+        <div class="campo">
+
+          <label>
+            Ordenar por
+          </label>
+
+          <select
+            id="ordenacao"
+            onchange="aplicarFiltros()"
+          >
+
+            <option value="vendas">
+              🔥 Mais vendidos
+            </option>
+
+            <option value="comissao">
+              💰 Maior comissão
+            </option>
+
+            <option value="valorComissao">
+              💵 Maior valor de comissão
+            </option>
+
+            <option value="precoMenor">
+              💲 Menor preço
+            </option>
+
+            <option value="avaliacao">
+              ⭐ Melhor avaliação
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
       <button onclick="carregarProdutos()">
         🔄 Atualizar produtos
       </button>
-    </div>
+
+    </section>
 
     <div id="status">
       ⏳ Carregando produtos...
@@ -174,18 +305,16 @@
   </main>
 
   <script>
+
+    let todosProdutos = [];
+
     async function carregarProdutos() {
 
       const status =
         document.getElementById("status");
 
-      const container =
-        document.getElementById("produtos");
-
       status.innerHTML =
         "⏳ Buscando produtos na Shopee...";
-
-      container.innerHTML = "";
 
       try {
 
@@ -196,158 +325,294 @@
           await resposta.json();
 
         if (!dados.success) {
+
           throw new Error(
-            dados.error || "Erro desconhecido"
+            dados.error ||
+            "Erro desconhecido"
           );
+
         }
 
-        const produtos =
+        todosProdutos =
           dados.produtos || [];
 
         status.innerHTML =
-          `✅ ${produtos.length} produtos encontrados`;
+          `✅ ${todosProdutos.length} produtos carregados`;
 
-        if (produtos.length === 0) {
-
-          container.innerHTML =
-            "<p>Nenhum produto encontrado.</p>";
-
-          return;
-        }
-
-        produtos.forEach((produto, index) => {
-
-          const nome =
-            produto.productName || "Produto";
-
-          const vendas =
-            Number(produto.sales || 0);
-
-          const taxa =
-            Number(
-              produto.commissionRate || 0
-            ) * 100;
-
-          const comissao =
-            Number(
-              produto.commission || 0
-            );
-
-          const precoMin =
-            Number(
-              produto.priceMin || 0
-            );
-
-          const precoMax =
-            Number(
-              produto.priceMax || 0
-            );
-
-          const avaliacao =
-            produto.ratingStar || 0;
-
-          const desconto =
-            Number(
-              produto.priceDiscountRate || 0
-            );
-
-          const imagem =
-            produto.imageUrl || "";
-
-          const link =
-            produto.offerLink ||
-            produto.productLink ||
-            "#";
-
-          const card =
-            document.createElement("div");
-
-          card.className = "produto";
-
-          card.innerHTML = `
-
-            <img
-              src="${imagem}"
-              alt="${nome}"
-              onerror="this.style.display='none'"
-            >
-
-            <div class="conteudo">
-
-              <h2>
-                #${index + 1} ${nome}
-              </h2>
-
-              <div class="info">
-                🛒 Vendas:
-                <span class="destaque">
-                  ${vendas.toLocaleString("pt-BR")}
-                </span>
-              </div>
-
-              <div class="info">
-                💰 Comissão:
-                <span class="comissao">
-                  ${taxa.toFixed(2)}%
-                </span>
-              </div>
-
-              <div class="info">
-                💵 Comissão estimada:
-                <span class="comissao">
-                  R$ ${comissao.toFixed(2)}
-                </span>
-              </div>
-
-              <div class="info">
-                💲 Preço:
-                R$ ${precoMin.toFixed(2)}
-                ${
-                  precoMax > precoMin
-                    ? " - R$ " +
-                      precoMax.toFixed(2)
-                    : ""
-                }
-              </div>
-
-              <div class="info">
-                ⭐ Avaliação:
-                ${avaliacao}
-              </div>
-
-              <div class="info">
-                🔥 Desconto:
-                ${desconto}%
-              </div>
-
-              <a
-                class="link"
-                href="${link}"
-                target="_blank"
-              >
-                🔗 Ver produto
-              </a>
-
-            </div>
-          `;
-
-          container.appendChild(card);
-        });
+        aplicarFiltros();
 
       } catch (erro) {
 
         console.error(erro);
 
-        status.innerHTML = `
-          <span class="erro">
-            ❌ Erro ao carregar produtos:
-            ${erro.message}
-          </span>
-        `;
+        status.innerHTML =
+          `❌ Erro: ${erro.message}`;
+
       }
+
+    }
+
+    function aplicarFiltros() {
+
+      const pesquisa =
+        document
+          .getElementById("pesquisa")
+          .value
+          .toLowerCase()
+          .trim();
+
+      const minVendas =
+        Number(
+          document
+            .getElementById("minVendas")
+            .value
+        ) || 0;
+
+      const minComissao =
+        Number(
+          document
+            .getElementById("minComissao")
+            .value
+        ) || 0;
+
+      const ordenacao =
+        document
+          .getElementById("ordenacao")
+          .value;
+
+      let produtos =
+        todosProdutos.filter(produto => {
+
+          const nome =
+            (
+              produto.productName || ""
+            ).toLowerCase();
+
+          const vendas =
+            Number(
+              produto.sales || 0
+            );
+
+          const comissao =
+            Number(
+              produto.commissionRate || 0
+            ) * 100;
+
+          const correspondePesquisa =
+            !pesquisa ||
+            nome.includes(pesquisa);
+
+          return (
+            correspondePesquisa &&
+            vendas >= minVendas &&
+            comissao >= minComissao
+          );
+
+        });
+
+      produtos.sort((a, b) => {
+
+        if (ordenacao === "vendas") {
+
+          return (
+            Number(b.sales || 0) -
+            Number(a.sales || 0)
+          );
+
+        }
+
+        if (ordenacao === "comissao") {
+
+          return (
+            Number(b.commissionRate || 0) -
+            Number(a.commissionRate || 0)
+          );
+
+        }
+
+        if (ordenacao === "valorComissao") {
+
+          return (
+            Number(b.commission || 0) -
+            Number(a.commission || 0)
+          );
+
+        }
+
+        if (ordenacao === "precoMenor") {
+
+          return (
+            Number(a.priceMin || 0) -
+            Number(b.priceMin || 0)
+          );
+
+        }
+
+        if (ordenacao === "avaliacao") {
+
+          return (
+            Number(b.ratingStar || 0) -
+            Number(a.ratingStar || 0)
+          );
+
+        }
+
+        return 0;
+
+      });
+
+      mostrarProdutos(produtos);
+
+      document.getElementById("status").innerHTML =
+        `📊 ${produtos.length} produtos encontrados`;
+
+    }
+
+    function mostrarProdutos(produtos) {
+
+      const container =
+        document.getElementById("produtos");
+
+      container.innerHTML = "";
+
+      if (produtos.length === 0) {
+
+        container.innerHTML = `
+          <div class="sem-produtos">
+            😕 Nenhum produto corresponde aos filtros.
+          </div>
+        `;
+
+        return;
+      }
+
+      produtos.forEach((produto, index) => {
+
+        const nome =
+          produto.productName ||
+          "Produto";
+
+        const vendas =
+          Number(
+            produto.sales || 0
+          );
+
+        const taxa =
+          Number(
+            produto.commissionRate || 0
+          ) * 100;
+
+        const comissao =
+          Number(
+            produto.commission || 0
+          );
+
+        const precoMin =
+          Number(
+            produto.priceMin || 0
+          );
+
+        const precoMax =
+          Number(
+            produto.priceMax || 0
+          );
+
+        const avaliacao =
+          produto.ratingStar || 0;
+
+        const desconto =
+          Number(
+            produto.priceDiscountRate || 0
+          );
+
+        const imagem =
+          produto.imageUrl || "";
+
+        const link =
+          produto.offerLink ||
+          produto.productLink ||
+          "#";
+
+        const card =
+          document.createElement("div");
+
+        card.className = "produto";
+
+        card.innerHTML = `
+
+          <img
+            src="${imagem}"
+            alt="${nome}"
+            onerror="this.style.display='none'"
+          >
+
+          <div class="conteudo">
+
+            <h2>
+              #${index + 1} ${nome}
+            </h2>
+
+            <div class="info">
+              🛒 Vendas:
+              <span class="destaque">
+                ${vendas.toLocaleString("pt-BR")}
+              </span>
+            </div>
+
+            <div class="info">
+              💰 Comissão:
+              <span class="comissao">
+                ${taxa.toFixed(2)}%
+              </span>
+            </div>
+
+            <div class="info">
+              💵 Comissão estimada:
+              <span class="comissao">
+                R$ ${comissao.toFixed(2)}
+              </span>
+            </div>
+
+            <div class="info">
+              💲 Preço:
+              R$ ${precoMin.toFixed(2)}
+              ${
+                precoMax > precoMin
+                  ? " - R$ " +
+                    precoMax.toFixed(2)
+                  : ""
+              }
+            </div>
+
+            <div class="info">
+              ⭐ Avaliação:
+              ${avaliacao}
+            </div>
+
+            <div class="info">
+              🔥 Desconto:
+              ${desconto}%
+            </div>
+
+            <a
+              class="link"
+              href="${link}"
+              target="_blank"
+            >
+              🔗 Ver produto
+            </a>
+
+          </div>
+        `;
+
+        container.appendChild(card);
+
+      });
+
     }
 
     carregarProdutos();
+
   </script>
 
 </body>
