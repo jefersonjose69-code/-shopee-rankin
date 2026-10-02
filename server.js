@@ -73,65 +73,90 @@ async function shopeeRequest(query) {
   return data;
 }
 
-/*
-  IMPORTANTE:
-  O index.html fica na raiz do projeto.
-  Esta linha faz o Render entregar a página.
-*/
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.get("/api/produtos", async (req, res) => {
   try {
-    const query = `
-      {
-        productOfferV2(
-          sortType: 2
-          page: 1
-          limit: 10
-        ) {
-          nodes {
-            productName
-            itemId
-            commissionRate
-            commission
-            sales
-            priceMin
-            priceMax
-            imageUrl
-            shopName
-            productLink
-            offerLink
-            ratingStar
-            priceDiscountRate
-          }
 
-          pageInfo {
-            page
-            limit
-            hasNextPage
-          }
-        }
-      }
-    `;
-
-    const data = await shopeeRequest(query);
-
-    const produtos =
-      data?.data?.productOfferV2?.nodes || [];
-
-    const unicos = [];
+    const todosProdutos = [];
     const ids = new Set();
 
-    for (const produto of produtos) {
-      if (!ids.has(produto.itemId)) {
-        ids.add(produto.itemId);
-        unicos.push(produto);
+    /*
+      Vamos consultar até 10 páginas.
+      Como a Shopee pode repetir produtos entre páginas,
+      usamos itemId para eliminar duplicados.
+    */
+
+    for (let pagina = 1; pagina <= 10; pagina++) {
+
+      const query = `
+        {
+          productOfferV2(
+            sortType: 2
+            page: ${pagina}
+            limit: 50
+          ) {
+            nodes {
+              productName
+              itemId
+              commissionRate
+              commission
+              sales
+              priceMin
+              priceMax
+              imageUrl
+              shopName
+              productLink
+              offerLink
+              ratingStar
+              priceDiscountRate
+            }
+
+            pageInfo {
+              page
+              limit
+              hasNextPage
+            }
+          }
+        }
+      `;
+
+      const data = await shopeeRequest(query);
+
+      const produtos =
+        data?.data?.productOfferV2?.nodes || [];
+
+      if (produtos.length === 0) {
+        break;
+      }
+
+      for (const produto of produtos) {
+
+        if (!ids.has(produto.itemId)) {
+
+          ids.add(produto.itemId);
+          todosProdutos.push(produto);
+
+        }
+
+      }
+
+      const pageInfo =
+        data?.data?.productOfferV2?.pageInfo;
+
+      if (!pageInfo?.hasNextPage) {
+        break;
       }
     }
 
-    unicos.sort(
+    /*
+      Ordena todos os produtos encontrados
+      pelas maiores quantidades de vendas.
+    */
+
+    todosProdutos.sort(
       (a, b) =>
         Number(b.sales || 0) -
         Number(a.sales || 0)
@@ -139,11 +164,13 @@ app.get("/api/produtos", async (req, res) => {
 
     res.json({
       success: true,
-      total: unicos.length,
-      produtos: unicos
+      total: todosProdutos.length,
+      paginasConsultadas: 10,
+      produtos: todosProdutos
     });
 
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
