@@ -47,39 +47,6 @@ app.get("/api/produtos", async (req, res) => {
       });
     }
 
-    const query = `
-      query {
-        productOfferV2(
-          listType: 0,
-          sortType: 2,
-          page: 1,
-          limit: 50
-        ) {
-          nodes {
-            productName
-            itemId
-            shopId
-            productLink
-            offerLink
-            imageUrl
-            priceMin
-            priceMax
-            commissionRate
-            commission
-            sales
-            ratingStar
-            shopName
-            discount
-          }
-          pageInfo {
-            page
-            limit
-            hasNextPage
-          }
-        }
-      }
-    `;
-
     const produtos = [];
     const maxPaginas = 10;
 
@@ -106,7 +73,6 @@ app.get("/api/produtos", async (req, res) => {
               sales
               ratingStar
               shopName
-              discount
             }
             pageInfo {
               page
@@ -120,12 +86,10 @@ app.get("/api/produtos", async (req, res) => {
       const body = JSON.stringify({ query: queryPagina });
       const timestamp = Math.floor(Date.now() / 1000).toString();
 
-      const payload = body;
-
       const signature = crypto
         .createHash("sha256")
         .update(
-          `${SHOPEE_APP_ID}${timestamp}${payload}${SHOPEE_SECRET}`
+          `${SHOPEE_APP_ID}${timestamp}${body}${SHOPEE_SECRET}`
         )
         .digest("hex");
 
@@ -318,10 +282,8 @@ app.get("/api/videos/pexels", async (req, res) => {
           }
         })
         .sort((a, b) => {
-          const aScore =
-            (a.width || 0) <= 1080 ? 1 : 0;
-          const bScore =
-            (b.width || 0) <= 1080 ? 1 : 0;
+          const aScore = (a.width || 0) <= 1080 ? 1 : 0;
+          const bScore = (b.width || 0) <= 1080 ? 1 : 0;
           return bScore - aScore;
         });
 
