@@ -120,7 +120,7 @@ app.get("/api/produtos", async (req, res) => {
       const body = JSON.stringify({ query: queryPagina });
       const timestamp = Math.floor(Date.now() / 1000).toString();
 
-      const payload = `POST\n/graphql\n${body}`;
+      const payload = body;
 
       const signature = crypto
         .createHash("sha256")
