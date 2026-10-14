@@ -1,15 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Shopee Ranking</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -25,33 +23,20 @@
       text-align: center;
     }
 
-    header h1 {
-      margin: 0 0 6px;
-      font-size: 28px;
-    }
+    header h1 { margin: 0 0 6px; font-size: 28px; }
+    header p { margin: 0; opacity: .95; }
 
-    header p {
-      margin: 0;
-      opacity: 0.95;
-    }
+    .container { max-width: 1200px; margin: auto; padding: 20px; }
 
-    .container {
-      max-width: 1200px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    .filtros {
+    .filtros, .resumo, .criador {
       background: white;
       padding: 18px;
       border-radius: 12px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
 
-    .filtros h2 {
-      margin-top: 0;
-    }
+    .filtros h2, .criador h2 { margin-top: 0; }
 
     .grid-filtros {
       display: grid;
@@ -59,51 +44,36 @@
       gap: 12px;
     }
 
-    label {
-      font-weight: bold;
-      font-size: 14px;
-    }
+    label { font-weight: bold; font-size: 14px; }
 
-    input,
-    select,
-    button {
+    input, select, textarea, button {
       width: 100%;
       padding: 11px;
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 14px;
       margin-top: 5px;
+      font-family: inherit;
     }
 
-    button {
-      cursor: pointer;
-      border: none;
-      font-weight: bold;
-    }
+    textarea { resize: vertical; line-height: 1.5; }
 
-    .btn-atualizar {
+    button { cursor: pointer; border: none; font-weight: bold; }
+
+    button:disabled { opacity: .6; cursor: wait; }
+
+    .btn-atualizar, .btn-principal {
       background: #ee4d2d;
       color: white;
     }
 
-    .btn-limpar {
-      background: #555;
-      color: white;
-    }
+    .btn-limpar { background: #555; color: white; }
 
     .acoes {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 15px;
-    }
-
-    .resumo {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
     .produtos {
@@ -116,7 +86,7 @@
       background: white;
       border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
     }
 
     .produto img {
@@ -126,9 +96,7 @@
       background: #fafafa;
     }
 
-    .conteudo {
-      padding: 15px;
-    }
+    .conteudo { padding: 15px; }
 
     .produto h3 {
       font-size: 16px;
@@ -145,25 +113,10 @@
       margin-bottom: 10px;
     }
 
-    .alta {
-      background: #d9f7df;
-      color: #147a2d;
-    }
-
-    .boa {
-      background: #fff0c2;
-      color: #8a6500;
-    }
-
-    .volume {
-      background: #dcecff;
-      color: #175a9c;
-    }
-
-    .outros {
-      background: #eee;
-      color: #555;
-    }
+    .alta { background: #d9f7df; color: #147a2d; }
+    .boa { background: #fff0c2; color: #8a6500; }
+    .volume { background: #dcecff; color: #175a9c; }
+    .outros { background: #eee; color: #555; }
 
     .dados {
       display: grid;
@@ -183,13 +136,10 @@
       display: block;
       font-size: 15px;
       margin-top: 2px;
+      overflow-wrap: anywhere;
     }
 
-    .loja {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 12px;
-    }
+    .loja { font-size: 13px; color: #666; margin-bottom: 12px; }
 
     .btn-produto {
       display: block;
@@ -203,46 +153,62 @@
       margin-bottom: 8px;
     }
 
-    .btn-copiar {
-      background: #222;
-      color: white;
-    }
+    .btn-copiar { background: #222; color: white; }
 
-    .carregando,
-    .erro,
-    .vazio {
+    .carregando, .erro, .vazio {
       background: white;
       padding: 25px;
       border-radius: 10px;
       text-align: center;
     }
 
-    .erro {
-      color: #c00;
+    .erro { color: #c00; }
+
+    .criador .campo { margin-bottom: 14px; }
+
+    .ajuda {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    #statusVoz {
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 8px;
+      background: #f7f7f7;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    #audioGerado {
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    #baixarAudio {
+      display: none;
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #222;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      font-weight: bold;
     }
 
     @media (max-width: 600px) {
-      header h1 {
-        font-size: 23px;
-      }
-
-      .container {
-        padding: 12px;
-      }
-
-      .acoes {
-        grid-template-columns: 1fr;
-      }
-
-      .produto img {
-        height: 220px;
-      }
+      header h1 { font-size: 23px; }
+      .container { padding: 12px; }
+      .acoes { grid-template-columns: 1fr; }
+      .produto img { height: 220px; }
     }
   </style>
 </head>
 
 <body>
-
 <header>
   <h1>🛍️ Shopee Ranking</h1>
   <p>Produtos mais vendidos para afiliados</p>
@@ -250,684 +216,403 @@
 
 <div class="container">
 
-  <div class="filtros">
-
+  <section class="filtros">
     <h2>🔎 Filtros</h2>
 
     <div class="grid-filtros">
-
       <div>
-        <label>Pesquisar produto</label>
-        <input
-          type="text"
-          id="pesquisa"
-          placeholder="Ex.: tênis, celular..."
-        >
+        <label for="pesquisa">Pesquisar produto</label>
+        <input type="text" id="pesquisa" placeholder="Ex.: tênis, celular...">
       </div>
 
       <div>
-        <label>Vendas mínimas</label>
-        <input
-          type="number"
-          id="vendasMin"
-          placeholder="Ex.: 500"
-        >
+        <label for="vendasMin">Vendas mínimas</label>
+        <input type="number" id="vendasMin" placeholder="Ex.: 500">
       </div>
 
       <div>
-        <label>Comissão mínima (%)</label>
-        <input
-          type="number"
-          id="comissaoMin"
-          placeholder="Ex.: 20"
-          step="0.01"
-        >
+        <label for="comissaoMin">Comissão mínima (%)</label>
+        <input type="number" id="comissaoMin" placeholder="Ex.: 20" step="0.01">
       </div>
 
       <div>
-        <label>Preço máximo (R$)</label>
-        <input
-          type="number"
-          id="precoMax"
-          placeholder="Ex.: 100"
-          step="0.01"
-        >
+        <label for="precoMax">Preço máximo (R$)</label>
+        <input type="number" id="precoMax" placeholder="Ex.: 100" step="0.01">
       </div>
 
       <div>
-        <label>Ordenar por</label>
-
+        <label for="ordenacao">Ordenar por</label>
         <select id="ordenacao">
-
-          <option value="vendas">
-            🔥 Mais vendidos
-          </option>
-
-          <option value="comissao">
-            💰 Maior comissão
-          </option>
-
-          <option value="valorComissao">
-            💵 Maior valor de comissão
-          </option>
-
-          <option value="precoMenor">
-            💲 Menor preço
-          </option>
-
-          <option value="avaliacao">
-            ⭐ Melhor avaliação
-          </option>
-
+          <option value="vendas">🔥 Mais vendidos</option>
+          <option value="comissao">💰 Maior comissão (%)</option>
+          <option value="valorComissao">💵 Maior valor de comissão</option>
+          <option value="precoMenor">💲 Menor preço</option>
+          <option value="avaliacao">⭐ Melhor avaliação</option>
         </select>
-
       </div>
-
     </div>
 
     <div class="acoes">
+      <button class="btn-atualizar" onclick="carregarProdutos()">🔄 Atualizar produtos</button>
+      <button class="btn-limpar" onclick="limparFiltros()">🧹 Limpar filtros</button>
+    </div>
+  </section>
 
-      <button
-        class="btn-atualizar"
-        onclick="carregarProdutos()"
-      >
-        🔄 Atualizar produtos
-      </button>
+  <section class="criador">
+    <h2>🎙️ Criador de narração com IA</h2>
+    <p class="ajuda">
+      Primeiro vamos gerar e testar o áudio. Depois vamos integrar a narração
+      ao vídeo vertical dos produtos.
+    </p>
 
-      <button
-        class="btn-limpar"
-        onclick="limparFiltros()"
-      >
-        🧹 Limpar filtros
-      </button>
-
+    <div class="campo">
+      <label for="vozEscolhida">Escolha a voz</label>
+      <select id="vozEscolhida">
+        <option value="">Carregando vozes...</option>
+      </select>
     </div>
 
-  </div>
+    <div class="campo">
+      <label for="textoNarracao">Texto da narração</label>
+      <textarea id="textoNarracao" rows="5" maxlength="1200">Olha esse achadinho da Shopee! Um produto que pode facilitar seu dia a dia, com preço que chama atenção. Confira os detalhes e aproveite a oferta enquanto estiver disponível!</textarea>
+      <p class="ajuda">Limite: 1.200 caracteres. Textos curtos costumam funcionar melhor em vídeos de 15 segundos.</p>
+    </div>
 
-  <div class="resumo">
+    <button id="btnGerarVoz" class="btn-principal" onclick="gerarNarracao()">
+      🎧 Gerar narração
+    </button>
 
-    <strong>
-      📦 Produtos encontrados:
-      <span id="total">0</span>
-    </strong>
+    <div id="statusVoz" role="status" aria-live="polite">
+      ⏳ Carregando as vozes disponíveis...
+    </div>
 
-  </div>
+    <audio id="audioGerado" controls style="display:none"></audio>
+    <a id="baixarAudio" href="#" download="narracao-shopee.mp3">⬇️ Baixar narração em MP3</a>
+  </section>
+
+  <section class="resumo">
+    <strong>📦 Produtos encontrados: <span id="total">0</span></strong>
+  </section>
 
   <div id="resultado">
-
-    <div class="carregando">
-      ⏳ Carregando produtos...
-    </div>
-
+    <div class="carregando">⏳ Carregando produtos...</div>
   </div>
-
 </div>
 
 <script>
+"use strict";
 
 let todosProdutos = [];
-
-
-/* =========================
-   INDICADOR
-========================= */
+let urlAudioAtual = null;
 
 function definirIndicador(produto) {
-
-  const vendas =
-    Number(produto.sales || 0);
-
-  const comissao =
-    Number(produto.commissionRate || 0) * 100;
+  const vendas = Number(produto.sales || 0);
+  const comissao = Number(produto.commissionRate || 0) * 100;
 
   if (vendas >= 500 && comissao >= 20) {
-
-    return {
-      classe: "alta",
-      texto: "🟢 Alta combinação"
-    };
-
+    return { classe: "alta", texto: "🟢 Alta combinação" };
   }
-
   if (vendas >= 100 && comissao >= 10) {
-
-    return {
-      classe: "boa",
-      texto: "🟡 Boa combinação"
-    };
-
+    return { classe: "boa", texto: "🟡 Boa combinação" };
   }
-
   if (vendas >= 1000) {
-
-    return {
-      classe: "volume",
-      texto: "🔵 Volume alto"
-    };
-
+    return { classe: "volume", texto: "🔵 Volume alto" };
   }
-
-  return {
-    classe: "outros",
-    texto: "⚪ Outros"
-  };
-
+  return { classe: "outros", texto: "⚪ Outros" };
 }
 
-
-/* =========================
-   CARREGAR PRODUTOS
-========================= */
+function escaparHTML(valor) {
+  return String(valor ?? "").replace(/[&<>"']/g, caractere => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[caractere]);
+}
 
 async function carregarProdutos() {
-
-  const resultado =
-    document.getElementById("resultado");
-
-  resultado.innerHTML = `
-    <div class="carregando">
-      ⏳ Carregando produtos da Shopee...
-    </div>
-  `;
+  const resultado = document.getElementById("resultado");
+  resultado.innerHTML = '<div class="carregando">⏳ Carregando produtos da Shopee...</div>';
 
   try {
+    const resposta = await fetch("/api/produtos");
+    const dados = await resposta.json();
 
-    const resposta =
-      await fetch("/api/produtos");
-
-    const dados =
-      await resposta.json();
-
-    if (!dados.success) {
-
-      throw new Error(
-        dados.error || "Erro ao carregar produtos."
-      );
-
+    if (!resposta.ok || !dados.success) {
+      throw new Error(dados.error || "Erro ao carregar produtos.");
     }
 
-    todosProdutos =
-      dados.produtos || [];
-
+    todosProdutos = dados.produtos || [];
     aplicarFiltros();
-
   } catch (erro) {
-
     console.error(erro);
-
-    resultado.innerHTML = `
-      <div class="erro">
-        ❌ Erro ao carregar produtos.<br><br>
-        ${erro.message}
-      </div>
-    `;
-
+    resultado.innerHTML = `<div class="erro">❌ Erro ao carregar produtos.<br><br>${escaparHTML(erro.message)}</div>`;
   }
-
 }
-
-
-/* =========================
-   FILTROS
-========================= */
 
 function aplicarFiltros() {
+  const pesquisa = document.getElementById("pesquisa").value.toLowerCase().trim();
+  const vendasMin = Number(document.getElementById("vendasMin").value) || 0;
+  const comissaoMin = Number(document.getElementById("comissaoMin").value) || 0;
+  const precoMax = document.getElementById("precoMax").value === ""
+    ? Infinity : Number(document.getElementById("precoMax").value);
+  const ordenacao = document.getElementById("ordenacao").value;
 
-  const pesquisa =
-    document
-      .getElementById("pesquisa")
-      .value
-      .toLowerCase()
-      .trim();
+  let produtos = todosProdutos.filter(produto => {
+    const nome = String(produto.productName || "").toLowerCase();
+    const vendas = Number(produto.sales || 0);
+    const comissao = Number(produto.commissionRate || 0) * 100;
+    const preco = Number(produto.priceMin || 0);
 
-  const vendasMin =
-    Number(
-      document.getElementById("vendasMin").value
-    ) || 0;
-
-  const comissaoMin =
-    Number(
-      document.getElementById("comissaoMin").value
-    ) || 0;
-
-  const precoMax =
-    Number(
-      document.getElementById("precoMax").value
-    ) || Infinity;
-
-  const ordenacao =
-    document.getElementById("ordenacao").value;
-
-
-  let produtos =
-    todosProdutos.filter(produto => {
-
-      const nome =
-        String(
-          produto.productName || ""
-        ).toLowerCase();
-
-      const vendas =
-        Number(produto.sales || 0);
-
-      const comissao =
-        Number(produto.commissionRate || 0) * 100;
-
-      const preco =
-        Number(produto.priceMin || 0);
-
-
-      if (
-        pesquisa &&
-        !nome.includes(pesquisa)
-      ) {
-        return false;
-      }
-
-
-      if (
-        vendas < vendasMin
-      ) {
-        return false;
-      }
-
-
-      if (
-        comissao < comissaoMin
-      ) {
-        return false;
-      }
-
-
-      if (
-        preco > precoMax
-      ) {
-        return false;
-      }
-
-
-      return true;
-
-    });
-
-
-  /* =========================
-     ORDENAÇÃO
-  ========================= */
-
-  produtos.sort((a, b) => {
-
-    if (ordenacao === "vendas") {
-
-      return (
-        Number(b.sales || 0) -
-        Number(a.sales || 0)
-      );
-
-    }
-
-
-    if (ordenacao === "comissao") {
-
-      return (
-        Number(b.commissionRate || 0) -
-        Number(a.commissionRate || 0)
-      );
-
-    }
-
-
-    if (ordenacao === "valorComissao") {
-
-      return (
-        Number(b.commission || 0) -
-        Number(a.commission || 0)
-      );
-
-    }
-
-
-    if (ordenacao === "precoMenor") {
-
-      return (
-        Number(a.priceMin || 0) -
-        Number(b.priceMin || 0)
-      );
-
-    }
-
-
-    if (ordenacao === "avaliacao") {
-
-      return (
-        Number(b.ratingStar || 0) -
-        Number(a.ratingStar || 0)
-      );
-
-    }
-
-
-    return 0;
-
+    return (!pesquisa || nome.includes(pesquisa)) &&
+      vendas >= vendasMin &&
+      comissao >= comissaoMin &&
+      preco <= precoMax;
   });
 
+  produtos.sort((a, b) => {
+    if (ordenacao === "vendas") return Number(b.sales || 0) - Number(a.sales || 0);
+    if (ordenacao === "comissao") return Number(b.commissionRate || 0) - Number(a.commissionRate || 0);
+    if (ordenacao === "valorComissao") return Number(b.commission || 0) - Number(a.commission || 0);
+    if (ordenacao === "precoMenor") return Number(a.priceMin || 0) - Number(b.priceMin || 0);
+    if (ordenacao === "avaliacao") return Number(b.ratingStar || 0) - Number(a.ratingStar || 0);
+    return 0;
+  });
 
-  document.getElementById("total")
-    .textContent = produtos.length;
-
-
+  document.getElementById("total").textContent = produtos.length;
   renderizarProdutos(produtos);
-
 }
-
-
-/* =========================
-   RENDERIZAR
-========================= */
 
 function renderizarProdutos(produtos) {
+  const resultado = document.getElementById("resultado");
 
-  const resultado =
-    document.getElementById("resultado");
-
-
-  if (produtos.length === 0) {
-
-    resultado.innerHTML = `
-      <div class="vazio">
-        🔎 Nenhum produto encontrado
-        com esses filtros.
-      </div>
-    `;
-
+  if (!produtos.length) {
+    resultado.innerHTML = '<div class="vazio">🔎 Nenhum produto encontrado com esses filtros.</div>';
     return;
-
   }
 
+  resultado.innerHTML = '<div class="produtos">' + produtos.map((produto, indice) => {
+    const indicador = definirIndicador(produto);
+    const vendas = Number(produto.sales || 0);
+    const comissaoPercentual = Number(produto.commissionRate || 0) * 100;
+    const valorComissao = Number(produto.commission || 0);
+    const precoMin = Number(produto.priceMin || 0);
+    const precoMax = Number(produto.priceMax || 0);
+    const avaliacao = Number(produto.ratingStar || 0);
+    const desconto = Number(produto.priceDiscountRate || 0);
+    const precoTexto = precoMin === precoMax
+      ? `R$ ${precoMin.toFixed(2)}`
+      : `R$ ${precoMin.toFixed(2)} - R$ ${precoMax.toFixed(2)}`;
 
-  resultado.innerHTML = `
-    <div class="produtos">
+    const link = produto.offerLink || produto.productLink || "";
+    const imagem = produto.imageUrl || "";
+    const nome = produto.productName || "Produto sem nome";
+    const loja = produto.shopName || "Loja não informada";
 
-      ${produtos.map(produto => {
-
-        const indicador =
-          definirIndicador(produto);
-
-
-        const vendas =
-          Number(produto.sales || 0);
-
-
-        const comissaoPercentual =
-          Number(
-            produto.commissionRate || 0
-          ) * 100;
-
-
-        const valorComissao =
-          Number(
-            produto.commission || 0
-          );
-
-
-        const precoMin =
-          Number(
-            produto.priceMin || 0
-          );
-
-
-        const precoMax =
-          Number(
-            produto.priceMax || 0
-          );
-
-
-        const avaliacao =
-          Number(
-            produto.ratingStar || 0
-          );
-
-
-        const desconto =
-          Number(
-            produto.priceDiscountRate || 0
-          );
-
-
-        const precoTexto =
-          precoMin === precoMax
-            ? `R$ ${precoMin.toFixed(2)}`
-            : `R$ ${precoMin.toFixed(2)} - R$ ${precoMax.toFixed(2)}`;
-
-
-        return `
-
-          <div class="produto">
-
-            <img
-              src="${produto.imageUrl || ""}"
-              alt="${produto.productName || "Produto"}"
-              loading="lazy"
-            >
-
-            <div class="conteudo">
-
-              <span
-                class="indicador ${indicador.classe}"
-              >
-                ${indicador.texto}
-              </span>
-
-
-              <h3>
-                ${produto.productName || "Produto sem nome"}
-              </h3>
-
-
-              <div class="dados">
-
-                <div class="dado">
-                  🔥 Vendas
-                  <strong>
-                    ${vendas.toLocaleString("pt-BR")}
-                  </strong>
-                </div>
-
-
-                <div class="dado">
-                  💰 Comissão
-                  <strong>
-                    ${comissaoPercentual.toFixed(2)}%
-                  </strong>
-                </div>
-
-
-                <div class="dado">
-                  💵 Valor comissão
-                  <strong>
-                    R$ ${valorComissao.toFixed(2)}
-                  </strong>
-                </div>
-
-
-                <div class="dado">
-                  💲 Preço
-                  <strong>
-                    ${precoTexto}
-                  </strong>
-                </div>
-
-
-                <div class="dado">
-                  ⭐ Avaliação
-                  <strong>
-                    ${avaliacao.toFixed(1)}
-                  </strong>
-                </div>
-
-
-                <div class="dado">
-                  🏷️ Desconto
-                  <strong>
-                    ${desconto}%
-                  </strong>
-                </div>
-
-              </div>
-
-
-              <div class="loja">
-                🏪 ${produto.shopName || "Loja não informada"}
-              </div>
-
-
-              <a
-                class="btn-produto"
-                href="${produto.offerLink || produto.productLink || "#"}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                🛒 Ver produto / Afiliado
-              </a>
-
-
-              <button
-                class="btn-copiar"
-                onclick="copiarLink('${escapeAttribute(produto.offerLink || produto.productLink || "")}')"
-              >
-                🔗 Copiar link de afiliado
-              </button>
-
-            </div>
-
+    return `
+      <article class="produto">
+        <img src="${escaparHTML(imagem)}" alt="${escaparHTML(nome)}" loading="lazy">
+        <div class="conteudo">
+          <span class="indicador ${indicador.classe}">${indicador.texto}</span>
+          <h3>${escaparHTML(nome)}</h3>
+          <div class="dados">
+            <div class="dado">🔥 Vendas<strong>${vendas.toLocaleString("pt-BR")}</strong></div>
+            <div class="dado">💰 Comissão<strong>${comissaoPercentual.toFixed(2)}%</strong></div>
+            <div class="dado">💵 Valor comissão<strong>R$ ${valorComissao.toFixed(2)}</strong></div>
+            <div class="dado">💲 Preço<strong>${precoTexto}</strong></div>
+            <div class="dado">⭐ Avaliação<strong>${avaliacao.toFixed(1)}</strong></div>
+            <div class="dado">🏷️ Desconto<strong>${desconto}%</strong></div>
           </div>
+          <div class="loja">🏪 ${escaparHTML(loja)}</div>
+          <a class="btn-produto" href="${escaparHTML(link || "#")}" target="_blank" rel="noopener noreferrer">🛒 Ver produto / Afiliado</a>
+          <button class="btn-copiar" onclick="copiarLinkPorIndice(${indice}, this)">🔗 Copiar link de afiliado</button>
+          <button style="background:#333;color:white;margin-top:8px" onclick="usarProdutoNaNarracao(${indice})">🎬 Usar produto na narração</button>
+        </div>
+      </article>`;
+  }).join("") + "</div>";
 
-        `;
-
-      }).join("")}
-
-    </div>
-  `;
-
+  // Guarda a lista atualmente exibida para os botões de cada produto.
+  window.produtosExibidos = produtos;
 }
 
+async function copiarLinkPorIndice(indice, botao) {
+  const produtos = window.produtosExibidos || [];
+  const produto = produtos[indice];
+  if (!produto) return;
 
-/* =========================
-   COPIAR LINK
-========================= */
-
-function escapeAttribute(texto) {
-
-  return String(texto)
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'");
-
-}
-
-
-async function copiarLink(link) {
+  const link = produto.offerLink || produto.productLink || "";
+  if (!link) {
+    alert("Este produto não tem link disponível.");
+    return;
+  }
 
   try {
-
     await navigator.clipboard.writeText(link);
-
     alert("✅ Link de afiliado copiado!");
-
   } catch (erro) {
-
-    const area =
-      document.createElement("textarea");
-
+    const area = document.createElement("textarea");
     area.value = link;
-
     document.body.appendChild(area);
-
     area.select();
-
     document.execCommand("copy");
-
     area.remove();
-
     alert("✅ Link de afiliado copiado!");
-
   }
-
 }
 
+function usarProdutoNaNarracao(indice) {
+  const produto = (window.produtosExibidos || [])[indice];
+  if (!produto) return;
 
-/* =========================
-   LIMPAR FILTROS
-========================= */
+  const nome = produto.productName || "este achadinho";
+  const preco = Number(produto.priceMin || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+
+  document.getElementById("textoNarracao").value =
+    `Olha esse achadinho da Shopee! ${nome}. O preço começa em ${preco}. Confira os detalhes e veja se essa oferta combina com você!`;
+
+  document.querySelector(".criador").scrollIntoView({ behavior: "smooth" });
+}
 
 function limparFiltros() {
-
   document.getElementById("pesquisa").value = "";
-
   document.getElementById("vendasMin").value = "";
-
   document.getElementById("comissaoMin").value = "";
-
   document.getElementById("precoMax").value = "";
-
   document.getElementById("ordenacao").value = "vendas";
-
   aplicarFiltros();
-
 }
 
+/* VOZES DA ELEVENLABS */
 
-/* =========================
-   FILTROS AUTOMÁTICOS
-========================= */
+async function carregarVozes() {
+  const seletor = document.getElementById("vozEscolhida");
+  const status = document.getElementById("statusVoz");
 
-document
-  .getElementById("pesquisa")
-  .addEventListener(
-    "input",
-    aplicarFiltros
-  );
+  try {
+    const resposta = await fetch("/api/voz/vozes");
+    const dados = await resposta.json();
 
+    if (!resposta.ok || !dados.success) {
+      throw new Error(dados.error || "Não foi possível carregar as vozes.");
+    }
 
-document
-  .getElementById("vendasMin")
-  .addEventListener(
-    "input",
-    aplicarFiltros
-  );
+    const vozes = dados.vozes || [];
+    seletor.innerHTML = "";
 
+    if (!vozes.length) {
+      throw new Error("A API não retornou nenhuma voz.");
+    }
 
-document
-  .getElementById("comissaoMin")
-  .addEventListener(
-    "input",
-    aplicarFiltros
-  );
+    vozes.forEach(voz => {
+      const opcao = document.createElement("option");
+      opcao.value = voz.voice_id;
+      opcao.textContent = voz.name;
+      seletor.appendChild(opcao);
+    });
 
+    // Liam é a opção inicial para testar conteúdo de redes sociais.
+    const vozPreferida = "TX3LPaxmHKxFdv7VOQHJ";
+    if (vozes.some(voz => voz.voice_id === vozPreferida)) {
+      seletor.value = vozPreferida;
+    }
 
-document
-  .getElementById("precoMax")
-  .addEventListener(
-    "input",
-    aplicarFiltros
-  );
+    status.textContent = `✅ ${vozes.length} vozes carregadas. Escolha uma e gere a narração. A pronúncia em português será avaliada no teste.`;
+  } catch (erro) {
+    console.error(erro);
+    seletor.innerHTML = '<option value="">Erro ao carregar vozes</option>';
+    status.textContent = "❌ Erro ao carregar as vozes: " + erro.message;
+  }
+}
 
+async function gerarNarracao() {
+  const botao = document.getElementById("btnGerarVoz");
+  const seletor = document.getElementById("vozEscolhida");
+  const texto = document.getElementById("textoNarracao").value.trim();
+  const status = document.getElementById("statusVoz");
+  const audio = document.getElementById("audioGerado");
+  const baixar = document.getElementById("baixarAudio");
 
-document
-  .getElementById("ordenacao")
-  .addEventListener(
-    "change",
-    aplicarFiltros
-  );
+  if (!seletor.value) {
+    status.textContent = "❌ Escolha uma voz antes de continuar.";
+    return;
+  }
 
+  if (!texto) {
+    status.textContent = "❌ Digite o texto da narração.";
+    return;
+  }
 
-/* =========================
-   INICIAR
-========================= */
+  if (texto.length > 1200) {
+    status.textContent = "❌ O texto ultrapassou o limite de 1.200 caracteres.";
+    return;
+  }
+
+  botao.disabled = true;
+  botao.textContent = "⏳ Gerando áudio...";
+  status.textContent = "Aguarde. A inteligência artificial está gerando a narração.";
+  baixar.style.display = "none";
+  audio.style.display = "none";
+
+  try {
+    const resposta = await fetch("/api/voz/narrar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        texto: texto,
+        voice_id: seletor.value
+      })
+    });
+
+    if (!resposta.ok) {
+      let mensagem = "Erro ao gerar a narração.";
+      try {
+        const erro = await resposta.json();
+        mensagem = erro.error || mensagem;
+      } catch (_) {}
+      throw new Error(mensagem);
+    }
+
+    const tipo = resposta.headers.get("content-type") || "";
+    if (tipo.includes("application/json")) {
+      const erro = await resposta.json();
+      throw new Error(erro.error || "A API não retornou um arquivo de áudio.");
+    }
+
+    const blob = await resposta.blob();
+    if (!blob.size) {
+      throw new Error("O arquivo de áudio recebido está vazio.");
+    }
+
+    if (urlAudioAtual) URL.revokeObjectURL(urlAudioAtual);
+    urlAudioAtual = URL.createObjectURL(blob);
+
+    audio.src = urlAudioAtual;
+    audio.style.display = "block";
+    baixar.href = urlAudioAtual;
+    baixar.style.display = "block";
+
+    status.textContent = "✅ Narração gerada! Toque no áudio para ouvir ou use o botão para baixar o MP3.";
+  } catch (erro) {
+    console.error(erro);
+    status.textContent = "❌ Não foi possível gerar a narração: " + erro.message;
+  } finally {
+    botao.disabled = false;
+    botao.textContent = "🎧 Gerar narração";
+  }
+}
+
+document.getElementById("pesquisa").addEventListener("input", aplicarFiltros);
+document.getElementById("vendasMin").addEventListener("input", aplicarFiltros);
+document.getElementById("comissaoMin").addEventListener("input", aplicarFiltros);
+document.getElementById("precoMax").addEventListener("input", aplicarFiltros);
+document.getElementById("ordenacao").addEventListener("change", aplicarFiltros);
 
 carregarProdutos();
-
+carregarVozes();
 </script>
-
 </body>
 </html>
