@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const crypto = require("crypto");
@@ -17,6 +16,7 @@ const SHOPEE_API_URL =
 const SHOPEE_APP_ID = process.env.SHOPEE_APP_ID;
 const SHOPEE_SECRET = process.env.SHOPEE_SECRET;
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
 
 // ==========================================
 // ASSINATURA DA API SHOPEE
@@ -170,11 +170,8 @@ app.get("/api/produtos", async (req, res) => {
 });
 
 // ==========================================
-// NOVO: CARREGAR IMAGENS DOS PRODUTOS
+// CARREGAR IMAGENS DOS PRODUTOS
 // ==========================================
-
-// Permite somente endereços conhecidos de imagens
-// da Shopee. Redirecionamentos também são verificados.
 
 function enderecoDeImagemPermitido(valor) {
   try {
@@ -186,13 +183,12 @@ function enderecoDeImagemPermitido(valor) {
 
     const host = endereco.hostname.toLowerCase();
 
-    const permitido =
+    return (
       host === "susercontent.com" ||
       host.endsWith(".susercontent.com") ||
       host === "shopee.com.br" ||
-      host.endsWith(".shopee.com.br");
-
-    return permitido;
+      host.endsWith(".shopee.com.br")
+    );
   } catch {
     return false;
   }
@@ -219,13 +215,13 @@ app.get("/api/imagem", async (req, res) => {
     let enderecoAtual = urlImagem;
     let resposta;
 
-    // Segue no máximo três redirecionamentos seguros
     for (let tentativa = 0; tentativa <= 3; tentativa++) {
       resposta = await fetch(enderecoAtual, {
         redirect: "manual",
         headers: {
           "User-Agent": "Mozilla/5.0",
-          "Accept": "image/avif,image/webp,image/png,image/jpeg,image/*"
+          "Accept":
+            "image/avif,image/webp,image/png,image/jpeg,image/*"
         },
         signal: AbortSignal.timeout(15000)
       });
@@ -302,7 +298,10 @@ app.get("/api/imagem", async (req, res) => {
       await resposta.arrayBuffer()
     );
 
-    if (buffer.length === 0 || buffer.length > 8 * 1024 * 1024) {
+    if (
+      buffer.length === 0 ||
+      buffer.length > 8 * 1024 * 1024
+    ) {
       return res.status(413).json({
         success: false,
         error: "A imagem está vazia ou excede o limite permitido."
@@ -326,6 +325,142 @@ app.get("/api/imagem", async (req, res) => {
     return res.status(502).json({
       success: false,
       error: "Falha ao carregar a imagem do produto."
+    });
+  }
+});
+
+// ==========================================
+// BIBLIOTECA DE VÍDEOS PEXELS
+// ==========================================
+
+app.get("/api/videos/pexels", async (req, res) => {
+  try {
+    if (!PEXELS_API_KEY) {
+      return res.status(503).json({
+        success: false,
+        code: "PEXELS_KEY_MISSING",
+        error:
+          "Configure PEXELS_API_KEY no Render. " +
+          "A busca precisa de uma chave válida do Pexels."
+      });
+    }
+
+    const query = String(req.query.q || "")
+      .trim()
+      .slice(0, 120);
+
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        error: "Digite um tema para buscar vídeos."
+      });
+    }
+
+    const perPage = Math.max(
+      1,
+      Math.min(12, Number(req.query.per_page) || 8)
+    );
+
+    const orientationPermitida = [
+      "portrait",
+      "landscape",
+      "square"
+    ];
+
+    const orientation = orientationPermitida.includes(
+      String(req.query.orientation || "portrait")
+    )
+      ? String(req.query.orientation || "portrait")
+      : "portrait";
+
+    const url = new URL(
+      "https://api.pexels.com/v1/videos/search"
+    );
+
+    url.searchParams.set("query", query);
+    url.searchParams.set("per_page", String(perPage));
+    url.searchParams.set("orientation", orientation);
+    url.searchParams.set("locale", "pt-BR");
+
+    const response = await fetch(url, {
+      headers: {
+        "Authorization": PEXELS_API_KEY
+      },
+      signal: AbortSignal.timeout(20000)
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      console.error(
+        "Pexels API:",
+        response.status,
+        data
+      );
+
+      return res.status(
+        response.status === 429 ? 429 : 502
+      ).json({
+        success: false,
+        error:
+          response.status === 401
+            ? "A chave do Pexels é inválida."
+            : response.status === 429
+              ? "Limite de buscas do Pexels atingido. Tente mais tarde."
+              : "O Pexels não conseguiu realizar a busca."
+      });
+    }
+
+    const videos = (data.videos || [])
+      .map(v => {
+        const files = (v.video_files || [])
+          .filter(
+            f => f.link && f.file_type === "video/mp4"
+          )
+          .sort(
+            (a, b) =>
+              (b.width * b.height) -
+              (a.width * a.height)
+          );
+
+        const file =
+          files.find(f => f.width <= 1080) ||
+          files[files.length - 1];
+
+        return {
+          id: v.id,
+          url: v.url,
+          image: v.image,
+          duration: v.duration,
+          width: v.width,
+          height: v.height,
+          photographer: v.user?.name || "Criador Pexels",
+          photographer_url:
+            v.user?.url || "https://www.pexels.com/",
+          video_file: file?.link || ""
+        };
+      })
+      .filter(v => v.video_file);
+
+    return res.json({
+      success: true,
+      total: data.total_results || videos.length,
+      query,
+      videos,
+      pexels_url:
+        data.url ||
+        `https://www.pexels.com/search/videos/${encodeURIComponent(query)}/`
+    });
+  } catch (error) {
+    console.error(
+      "Erro ao buscar vídeos Pexels:",
+      error.message
+    );
+
+    return res.status(502).json({
+      success: false,
+      error:
+        "Falha ao consultar vídeos no Pexels. Tente novamente."
     });
   }
 });
@@ -359,7 +494,8 @@ app.get("/api/voz/vozes", async (req, res) => {
 
       return res.status(resposta.status).json({
         success: false,
-        error: "Não foi possível consultar as vozes da ElevenLabs."
+        error:
+          "Não foi possível consultar as vozes da ElevenLabs."
       });
     }
 
@@ -462,7 +598,8 @@ app.post("/api/voz/narrar", async (req, res) => {
       return res.status(502).json({
         success: false,
         error:
-          "A ElevenLabs não conseguiu gerar o áudio. Confira sua conta, seus créditos e a voz selecionada."
+          "A ElevenLabs não conseguiu gerar o áudio. " +
+          "Confira sua conta, seus créditos e a voz selecionada."
       });
     }
 
