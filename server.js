@@ -4,11 +4,10 @@ const crypto = require("crypto");
 const path = require("path");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json({ limit: "100kb" }));
-
-const PORT = process.env.PORT || 3000;
 
 const SHOPEE_API_URL =
   "https://open-api.affiliate.shopee.com.br/graphql";
@@ -19,7 +18,7 @@ const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
 
 // ==========================================
-// ASSINATURA DA API SHOPEE
+// ASSINATURA SHOPEE
 // ==========================================
 
 function createSignature(timestamp, payload) {
@@ -55,9 +54,10 @@ async function shopeeRequest(query) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": authorization
+      Authorization: authorization
     },
-    body: payload
+    body: payload,
+    signal: AbortSignal.timeout(25000)
   });
 
   const data = await response.json();
@@ -86,7 +86,7 @@ app.get("/", (req, res) => {
 });
 
 // ==========================================
-// RANKING DE PRODUTOS SHOPEE
+// RANKING DE PRODUTOS
 // ==========================================
 
 app.get("/api/produtos", async (req, res) => {
@@ -133,11 +133,11 @@ app.get("/api/produtos", async (req, res) => {
       const produtos =
         data?.data?.productOfferV2?.nodes || [];
 
-      if (produtos.length === 0) break;
-
       for (const produto of produtos) {
-        if (!ids.has(produto.itemId)) {
-          ids.add(produto.itemId);
+        const id = String(produto.itemId || "");
+
+        if (id && !ids.has(id)) {
+          ids.add(id);
           todosProdutos.push(produto);
         }
       }
@@ -145,12 +145,13 @@ app.get("/api/produtos", async (req, res) => {
       const pageInfo =
         data?.data?.productOfferV2?.pageInfo;
 
-      if (!pageInfo?.hasNextPage) break;
+      if (!pageInfo?.hasNextPage || produtos.length === 0) {
+        break;
+      }
     }
 
     todosProdutos.sort(
-      (a, b) =>
-        Number(b.sales || 0) - Number(a.sales || 0)
+      (a, b) => Number(b.sales || 0) - Number(a.sales || 0)
     );
 
     res.json({
@@ -160,17 +161,17 @@ app.get("/api/produtos", async (req, res) => {
       produtos: todosProdutos
     });
   } catch (error) {
-    console.error("Erro no ranking:", error);
+    console.error("Erro no ranking:", error.message);
 
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message || "Não foi possível carregar os produtos."
     });
   }
 });
 
 // ==========================================
-// CARREGAR IMAGENS DOS PRODUTOS
+// PROXY SEGURO PARA IMAGENS DA SHOPEE
 // ==========================================
 
 function enderecoDeImagemPermitido(valor) {
@@ -198,17 +199,10 @@ app.get("/api/imagem", async (req, res) => {
   try {
     const urlImagem = String(req.query.url || "");
 
-    if (!urlImagem) {
+    if (!urlImagem || !enderecoDeImagemPermitido(urlImagem)) {
       return res.status(400).json({
         success: false,
-        error: "Informe a URL da imagem no parâmetro url."
-      });
-    }
-
-    if (!enderecoDeImagemPermitido(urlImagem)) {
-      return res.status(400).json({
-        success: false,
-        error: "O endereço da imagem não é permitido."
+        error: "Endereço de imagem inválido ou não permitido."
       });
     }
 
@@ -220,16 +214,12 @@ app.get("/api/imagem", async (req, res) => {
         redirect: "manual",
         headers: {
           "User-Agent": "Mozilla/5.0",
-          "Accept":
-            "image/avif,image/webp,image/png,image/jpeg,image/*"
+          Accept: "image/avif,image/webp,image/png,image/jpeg,image/*"
         },
         signal: AbortSignal.timeout(15000)
       });
 
-      if (
-        resposta.status >= 300 &&
-        resposta.status < 400
-      ) {
+      if (resposta.status >= 300 && resposta.status < 400) {
         const destino = resposta.headers.get("location");
 
         if (!destino || tentativa === 3) {
@@ -239,15 +229,12 @@ app.get("/api/imagem", async (req, res) => {
           });
         }
 
-        enderecoAtual = new URL(
-          destino,
-          enderecoAtual
-        ).toString();
+        enderecoAtual = new URL(destino, enderecoAtual).toString();
 
         if (!enderecoDeImagemPermitido(enderecoAtual)) {
           return res.status(502).json({
             success: false,
-            error: "O destino da imagem não é permitido."
+            error: "Redirecionamento de imagem não permitido."
           });
         }
 
@@ -260,7 +247,7 @@ app.get("/api/imagem", async (req, res) => {
     if (!resposta || !resposta.ok) {
       return res.status(502).json({
         success: false,
-        error: "A Shopee não disponibilizou esta imagem."
+        error: "A imagem não está disponível."
       });
     }
 
@@ -283,28 +270,12 @@ app.get("/api/imagem", async (req, res) => {
       });
     }
 
-    const tamanhoDeclarado = Number(
-      resposta.headers.get("content-length") || 0
-    );
+    const buffer = Buffer.from(await resposta.arrayBuffer());
 
-    if (tamanhoDeclarado > 8 * 1024 * 1024) {
+    if (!buffer.length || buffer.length > 8 * 1024 * 1024) {
       return res.status(413).json({
         success: false,
-        error: "A imagem é muito grande."
-      });
-    }
-
-    const buffer = Buffer.from(
-      await resposta.arrayBuffer()
-    );
-
-    if (
-      buffer.length === 0 ||
-      buffer.length > 8 * 1024 * 1024
-    ) {
-      return res.status(413).json({
-        success: false,
-        error: "A imagem está vazia ou excede o limite permitido."
+        error: "Imagem vazia ou maior que o limite de 8 MB."
       });
     }
 
@@ -317,10 +288,7 @@ app.get("/api/imagem", async (req, res) => {
 
     return res.send(buffer);
   } catch (error) {
-    console.error(
-      "Erro ao carregar imagem:",
-      error.message
-    );
+    console.error("Erro ao carregar imagem:", error.message);
 
     return res.status(502).json({
       success: false,
@@ -330,7 +298,7 @@ app.get("/api/imagem", async (req, res) => {
 });
 
 // ==========================================
-// BIBLIOTECA DE VÍDEOS PEXELS
+// BUSCAR VÍDEOS GRATUITOS DO PEXELS
 // ==========================================
 
 app.get("/api/videos/pexels", async (req, res) => {
@@ -339,9 +307,7 @@ app.get("/api/videos/pexels", async (req, res) => {
       return res.status(503).json({
         success: false,
         code: "PEXELS_KEY_MISSING",
-        error:
-          "Configure PEXELS_API_KEY no Render. " +
-          "A busca precisa de uma chave válida do Pexels."
+        error: "Configure PEXELS_API_KEY nas variáveis do Render."
       });
     }
 
@@ -361,13 +327,9 @@ app.get("/api/videos/pexels", async (req, res) => {
       Math.min(12, Number(req.query.per_page) || 8)
     );
 
-    const orientationPermitida = [
-      "portrait",
-      "landscape",
-      "square"
-    ];
+    const orientacoes = ["portrait", "landscape", "square"];
 
-    const orientation = orientationPermitida.includes(
+    const orientation = orientacoes.includes(
       String(req.query.orientation || "portrait")
     )
       ? String(req.query.orientation || "portrait")
@@ -384,7 +346,7 @@ app.get("/api/videos/pexels", async (req, res) => {
 
     const response = await fetch(url, {
       headers: {
-        "Authorization": PEXELS_API_KEY
+        Authorization: PEXELS_API_KEY
       },
       signal: AbortSignal.timeout(20000)
     });
@@ -392,11 +354,7 @@ app.get("/api/videos/pexels", async (req, res) => {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      console.error(
-        "Pexels API:",
-        response.status,
-        data
-      );
+      console.error("Erro Pexels:", response.status, data);
 
       return res.status(
         response.status === 429 ? 429 : 502
@@ -406,26 +364,37 @@ app.get("/api/videos/pexels", async (req, res) => {
           response.status === 401
             ? "A chave do Pexels é inválida."
             : response.status === 429
-              ? "Limite de buscas do Pexels atingido. Tente mais tarde."
-              : "O Pexels não conseguiu realizar a busca."
+              ? "Limite de buscas atingido. Tente novamente mais tarde."
+              : "Não foi possível pesquisar vídeos no Pexels."
       });
     }
 
     const videos = (data.videos || [])
       .map(v => {
         const files = (v.video_files || [])
-          .filter(
-            f => f.link && f.file_type === "video/mp4"
-          )
-          .sort(
-            (a, b) =>
-              (b.width * b.height) -
-              (a.width * a.height)
-          );
+          .filter(f => {
+            return (
+              f.link &&
+              f.file_type === "video/mp4" &&
+              f.width &&
+              f.height
+            );
+          })
+          .sort((a, b) => {
+            const aScore =
+              Math.abs(a.width - 720) +
+              Math.abs(a.height - 1280);
+
+            const bScore =
+              Math.abs(b.width - 720) +
+              Math.abs(b.height - 1280);
+
+            return aScore - bScore;
+          });
 
         const file =
           files.find(f => f.width <= 1080) ||
-          files[files.length - 1];
+          files[0];
 
         return {
           id: v.id,
@@ -448,19 +417,14 @@ app.get("/api/videos/pexels", async (req, res) => {
       query,
       videos,
       pexels_url:
-        data.url ||
         `https://www.pexels.com/search/videos/${encodeURIComponent(query)}/`
     });
   } catch (error) {
-    console.error(
-      "Erro ao buscar vídeos Pexels:",
-      error.message
-    );
+    console.error("Erro Pexels:", error.message);
 
     return res.status(502).json({
       success: false,
-      error:
-        "Falha ao consultar vídeos no Pexels. Tente novamente."
+      error: "Falha ao consultar o Pexels."
     });
   }
 });
@@ -483,19 +447,19 @@ app.get("/api/voz/vozes", async (req, res) => {
       {
         headers: {
           "xi-api-key": ELEVENLABS_API_KEY
-        }
+        },
+        signal: AbortSignal.timeout(20000)
       }
     );
 
-    const dados = await resposta.json();
+    const dados = await resposta.json().catch(() => ({}));
 
     if (!resposta.ok) {
-      console.error("Erro ao consultar vozes:", dados);
+      console.error("Erro ElevenLabs:", resposta.status, dados);
 
-      return res.status(resposta.status).json({
+      return res.status(502).json({
         success: false,
-        error:
-          "Não foi possível consultar as vozes da ElevenLabs."
+        error: "Não foi possível consultar as vozes da ElevenLabs."
       });
     }
 
@@ -506,15 +470,15 @@ app.get("/api/voz/vozes", async (req, res) => {
       labels: voz.labels || {}
     }));
 
-    return res.json({
+    res.json({
       success: true,
       total: vozes.length,
       vozes
     });
   } catch (error) {
-    console.error("Erro nas vozes:", error);
+    console.error("Erro nas vozes:", error.message);
 
-    return res.status(500).json({
+    res.status(502).json({
       success: false,
       error: "Falha ao consultar as vozes."
     });
@@ -522,7 +486,7 @@ app.get("/api/voz/vozes", async (req, res) => {
 });
 
 // ==========================================
-// GERAR NARRAÇÃO EM MP3
+// GERAR NARRAÇÃO MP3
 // ==========================================
 
 app.post("/api/voz/narrar", async (req, res) => {
@@ -534,32 +498,24 @@ app.post("/api/voz/narrar", async (req, res) => {
       });
     }
 
-    const texto = String(
-      req.body?.texto || ""
-    ).trim();
-
-    const voiceId = String(
-      req.body?.voice_id || ""
-    ).trim();
+    const texto = String(req.body?.texto || "").trim();
+    const voiceId = String(req.body?.voice_id || "").trim();
 
     if (!texto) {
       return res.status(400).json({
         success: false,
-        error: "Informe o texto da narração."
+        error: "Digite o texto da narração."
       });
     }
 
     if (texto.length > 1200) {
       return res.status(400).json({
         success: false,
-        error: "O texto deve ter no máximo 1200 caracteres."
+        error: "A narração deve ter no máximo 1200 caracteres."
       });
     }
 
-    if (
-      !voiceId ||
-      !/^[a-zA-Z0-9_-]+$/.test(voiceId)
-    ) {
+    if (!voiceId || !/^[a-zA-Z0-9_-]+$/.test(voiceId)) {
       return res.status(400).json({
         success: false,
         error: "Selecione uma voz válida."
@@ -567,7 +523,9 @@ app.post("/api/voz/narrar", async (req, res) => {
     }
 
     const resposta = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}?output_format=mp3_44100_128`,
+      "https://api.elevenlabs.io/v1/text-to-speech/" +
+        encodeURIComponent(voiceId) +
+        "?output_format=mp3_44100_128",
       {
         method: "POST",
         headers: {
@@ -582,7 +540,8 @@ app.post("/api/voz/narrar", async (req, res) => {
             stability: 0.45,
             similarity_boost: 0.75
           }
-        })
+        }),
+        signal: AbortSignal.timeout(60000)
       }
     );
 
@@ -598,14 +557,12 @@ app.post("/api/voz/narrar", async (req, res) => {
       return res.status(502).json({
         success: false,
         error:
-          "A ElevenLabs não conseguiu gerar o áudio. " +
-          "Confira sua conta, seus créditos e a voz selecionada."
+          "A ElevenLabs não gerou o áudio. Confira sua conta, " +
+          "os créditos disponíveis e a voz selecionada."
       });
     }
 
-    const audio = Buffer.from(
-      await resposta.arrayBuffer()
-    );
+    const audio = Buffer.from(await resposta.arrayBuffer());
 
     res.set({
       "Content-Type": "audio/mpeg",
@@ -615,14 +572,11 @@ app.post("/api/voz/narrar", async (req, res) => {
 
     return res.send(audio);
   } catch (error) {
-    console.error(
-      "Erro ao gerar narração:",
-      error
-    );
+    console.error("Erro ao gerar narração:", error.message);
 
-    return res.status(500).json({
+    res.status(502).json({
       success: false,
-      error: "Erro interno ao gerar a narração."
+      error: "Erro ao gerar a narração."
     });
   }
 });
