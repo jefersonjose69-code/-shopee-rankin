@@ -1,122 +1,112 @@
+
 const express = require("express");
-const cors = require("cors");
 const crypto = require("crypto");
 const path = require("path");
+const { Readable } = require("stream");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json({ limit: "100kb" }));
-
-const SHOPEE_API_URL =
-  "https://open-api.affiliate.shopee.com.br/graphql";
+app.use(express.json({ limit: "2mb" }));
+app.use(express.static(path.join(__dirname)));
 
 const SHOPEE_APP_ID = process.env.SHOPEE_APP_ID;
 const SHOPEE_SECRET = process.env.SHOPEE_SECRET;
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
 
-// ==========================================
-// ASSINATURA SHOPEE
-// ==========================================
-
-function createSignature(timestamp, payload) {
-  const raw =
-    SHOPEE_APP_ID +
-    timestamp +
-    payload +
-    SHOPEE_SECRET;
-
-  return crypto
-    .createHash("sha256")
-    .update(raw)
-    .digest("hex");
-}
-
-async function shopeeRequest(query) {
-  if (!SHOPEE_APP_ID || !SHOPEE_SECRET) {
-    throw new Error(
-      "Credenciais da Shopee não configuradas no Render."
-    );
-  }
-
-  const timestamp = Math.floor(Date.now() / 1000);
-  const payload = JSON.stringify({ query });
-  const signature = createSignature(timestamp, payload);
-
-  const authorization =
-    `SHA256 Credential=${SHOPEE_APP_ID}, ` +
-    `Timestamp=${timestamp}, ` +
-    `Signature=${signature}`;
-
-  const response = await fetch(SHOPEE_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: authorization
-    },
-    body: payload,
-    signal: AbortSignal.timeout(25000)
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      `Shopee HTTP ${response.status}: ${JSON.stringify(data)}`
-    );
-  }
-
-  if (data.errors) {
-    throw new Error(
-      `Shopee API: ${JSON.stringify(data.errors)}`
-    );
-  }
-
-  return data;
-}
-
-// ==========================================
-// PÁGINA PRINCIPAL
-// ==========================================
+const SHOPEE_ENDPOINT =
+  "https://open-api.affiliate.shopee.com.br/graphql";
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// ==========================================
-// RANKING DE PRODUTOS
-// ==========================================
+app.get("/api/status", (req, res) => {
+  res.json({
+    status: "online",
+    message: "Shopee Ranking API funcionando",
+    servicos: {
+      shopee: Boolean(SHOPEE_APP_ID && SHOPEE_SECRET),
+      pexels: Boolean(PEXELS_API_KEY),
+      narracao: Boolean(ELEVENLABS_API_KEY)
+    }
+  });
+});
+
+/* =====================================================
+   SHOPEE — BUSCA E RANKING DE PRODUTOS
+===================================================== */
 
 app.get("/api/produtos", async (req, res) => {
   try {
-    const todosProdutos = [];
-    const ids = new Set();
-    let paginasConsultadas = 0;
+    if (!SHOPEE_APP_ID || !SHOPEE_SECRET) {
+      return res.status(500).json({
+        success: false,
+        error: "Configure SHOPEE_APP_ID e SHOPEE_SECRET no Render."
+      });
+    }
 
-    for (let pagina = 1; pagina <= 10; pagina++) {
-      const query = `
-        {
+    const query = `
+      query {
+        productOfferV2(
+          listType: 0,
+          sortType: 2,
+          page: 1,
+          limit: 50
+        ) {
+          nodes {
+            productName
+            itemId
+            shopId
+            productLink
+            offerLink
+            imageUrl
+            priceMin
+            priceMax
+            commissionRate
+            commission
+            sales
+            ratingStar
+            shopName
+            discount
+          }
+          pageInfo {
+            page
+            limit
+            hasNextPage
+          }
+        }
+      }
+    `;
+
+    const produtos = [];
+    const maxPaginas = 10;
+
+    for (let pagina = 1; pagina <= maxPaginas; pagina++) {
+      const queryPagina = `
+        query {
           productOfferV2(
-            sortType: 2
-            page: ${pagina}
+            listType: 0,
+            sortType: 2,
+            page: ${pagina},
             limit: 50
           ) {
             nodes {
               productName
               itemId
+              shopId
+              productLink
+              offerLink
+              imageUrl
+              priceMin
+              priceMax
               commissionRate
               commission
               sales
-              priceMin
-              priceMax
-              imageUrl
-              shopName
-              productLink
-              offerLink
               ratingStar
-              priceDiscountRate
+              shopName
+              discount
             }
             pageInfo {
               page
@@ -127,316 +117,327 @@ app.get("/api/produtos", async (req, res) => {
         }
       `;
 
-      const data = await shopeeRequest(query);
-      paginasConsultadas++;
+      const body = JSON.stringify({ query: queryPagina });
+      const timestamp = Math.floor(Date.now() / 1000).toString();
 
-      const produtos =
-        data?.data?.productOfferV2?.nodes || [];
+      const payload = `POST\n/graphql\n${body}`;
 
-      for (const produto of produtos) {
-        const id = String(produto.itemId || "");
+      const signature = crypto
+        .createHash("sha256")
+        .update(
+          `${SHOPEE_APP_ID}${timestamp}${payload}${SHOPEE_SECRET}`
+        )
+        .digest("hex");
 
-        if (id && !ids.has(id)) {
-          ids.add(id);
-          todosProdutos.push(produto);
+      const authorization =
+        `SHA256 Credential=${SHOPEE_APP_ID},` +
+        `Timestamp=${timestamp},Signature=${signature}`;
+
+      const response = await fetch(SHOPEE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: authorization
+        },
+        body
+      });
+
+      const resultado = await response.json();
+
+      if (!response.ok || resultado.errors) {
+        console.error(
+          "Erro Shopee:",
+          JSON.stringify(resultado.errors || resultado).slice(0, 1500)
+        );
+
+        if (produtos.length === 0) {
+          return res.status(502).json({
+            success: false,
+            error: "A Shopee não retornou os produtos.",
+            detalhes: resultado.errors || resultado
+          });
         }
+
+        break;
       }
 
-      const pageInfo =
-        data?.data?.productOfferV2?.pageInfo;
+      const dados = resultado.data?.productOfferV2;
+      const itens = dados?.nodes || [];
 
-      if (!pageInfo?.hasNextPage || produtos.length === 0) {
+      produtos.push(...itens);
+
+      if (!dados?.pageInfo?.hasNextPage || itens.length === 0) {
         break;
       }
     }
 
-    todosProdutos.sort(
+    const produtosUnicos = Array.from(
+      new Map(
+        produtos.map((p) => [
+          `${p.shopId || ""}-${p.itemId || p.productName}`,
+          p
+        ])
+      ).values()
+    );
+
+    produtosUnicos.sort(
       (a, b) => Number(b.sales || 0) - Number(a.sales || 0)
     );
 
     res.json({
       success: true,
-      total: todosProdutos.length,
-      paginasConsultadas,
-      produtos: todosProdutos
+      total: produtosUnicos.length,
+      produtos: produtosUnicos
     });
   } catch (error) {
-    console.error("Erro no ranking:", error.message);
+    console.error("Erro na API Shopee:", error);
 
     res.status(500).json({
       success: false,
-      error: error.message || "Não foi possível carregar os produtos."
+      error: "Erro ao buscar produtos da Shopee.",
+      detalhes: error.message
     });
   }
 });
 
-// ==========================================
-// PROXY SEGURO PARA IMAGENS DA SHOPEE
-// ==========================================
-
-function enderecoDeImagemPermitido(valor) {
-  try {
-    const endereco = new URL(valor);
-
-    if (endereco.protocol !== "https:") {
-      return false;
-    }
-
-    const host = endereco.hostname.toLowerCase();
-
-    return (
-      host === "susercontent.com" ||
-      host.endsWith(".susercontent.com") ||
-      host === "shopee.com.br" ||
-      host.endsWith(".shopee.com.br")
-    );
-  } catch {
-    return false;
-  }
-}
+/* =====================================================
+   PROXY DE IMAGENS DOS PRODUTOS
+===================================================== */
 
 app.get("/api/imagem", async (req, res) => {
   try {
-    const urlImagem = String(req.query.url || "");
+    const url = new URL(String(req.query.url || ""));
 
-    if (!urlImagem || !enderecoDeImagemPermitido(urlImagem)) {
-      return res.status(400).json({
-        success: false,
-        error: "Endereço de imagem inválido ou não permitido."
-      });
+    const hostPermitido =
+      /(^|\.)susercontent\.com$/i.test(url.hostname) ||
+      /(^|\.)shopee\.com\.br$/i.test(url.hostname);
+
+    if (url.protocol !== "https:" || !hostPermitido) {
+      return res.status(400).send("URL de imagem não permitida.");
     }
 
-    let enderecoAtual = urlImagem;
-    let resposta;
-
-    for (let tentativa = 0; tentativa <= 3; tentativa++) {
-      resposta = await fetch(enderecoAtual, {
-        redirect: "manual",
-        headers: {
-          "User-Agent": "Mozilla/5.0",
-          Accept: "image/avif,image/webp,image/png,image/jpeg,image/*"
-        },
-        signal: AbortSignal.timeout(15000)
-      });
-
-      if (resposta.status >= 300 && resposta.status < 400) {
-        const destino = resposta.headers.get("location");
-
-        if (!destino || tentativa === 3) {
-          return res.status(502).json({
-            success: false,
-            error: "Não foi possível acessar a imagem."
-          });
-        }
-
-        enderecoAtual = new URL(destino, enderecoAtual).toString();
-
-        if (!enderecoDeImagemPermitido(enderecoAtual)) {
-          return res.status(502).json({
-            success: false,
-            error: "Redirecionamento de imagem não permitido."
-          });
-        }
-
-        continue;
-      }
-
-      break;
-    }
-
-    if (!resposta || !resposta.ok) {
-      return res.status(502).json({
-        success: false,
-        error: "A imagem não está disponível."
-      });
-    }
-
-    const tipo = (
-      resposta.headers.get("content-type") || ""
-    ).split(";")[0].trim().toLowerCase();
-
-    const tiposPermitidos = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/gif",
-      "image/avif"
-    ];
-
-    if (!tiposPermitidos.includes(tipo)) {
-      return res.status(502).json({
-        success: false,
-        error: "O endereço não retornou uma imagem válida."
-      });
-    }
-
-    const buffer = Buffer.from(await resposta.arrayBuffer());
-
-    if (!buffer.length || buffer.length > 8 * 1024 * 1024) {
-      return res.status(413).json({
-        success: false,
-        error: "Imagem vazia ou maior que o limite de 8 MB."
-      });
-    }
-
-    res.set({
-      "Content-Type": tipo,
-      "Content-Length": String(buffer.length),
-      "Cache-Control": "public, max-age=3600",
-      "X-Content-Type-Options": "nosniff"
+    const upstream = await fetch(url.toString(), {
+      redirect: "follow",
+      signal: AbortSignal.timeout(15000)
     });
 
-    return res.send(buffer);
+    if (!upstream.ok || !upstream.body) {
+      return res.status(502).send("Não foi possível carregar a imagem.");
+    }
+
+    const finalUrl = new URL(upstream.url);
+    const finalHostPermitido =
+      /(^|\.)susercontent\.com$/i.test(finalUrl.hostname) ||
+      /(^|\.)shopee\.com\.br$/i.test(finalUrl.hostname);
+
+    if (finalUrl.protocol !== "https:" || !finalHostPermitido) {
+      return res.status(400).send("Redirecionamento não permitido.");
+    }
+
+    const contentType = upstream.headers.get("content-type") || "";
+
+    if (!contentType.startsWith("image/")) {
+      return res.status(415).send("O endereço não retornou uma imagem.");
+    }
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "public, max-age=86400");
+
+    Readable.fromWeb(upstream.body).pipe(res);
   } catch (error) {
     console.error("Erro ao carregar imagem:", error.message);
-
-    return res.status(502).json({
-      success: false,
-      error: "Falha ao carregar a imagem do produto."
-    });
+    res.status(500).send("Erro ao carregar imagem.");
   }
 });
 
-// ==========================================
-// BUSCAR VÍDEOS GRATUITOS DO PEXELS
-// ==========================================
+/* =====================================================
+   PEXELS — PESQUISA DE VÍDEOS GRATUITOS
+===================================================== */
 
 app.get("/api/videos/pexels", async (req, res) => {
   try {
     if (!PEXELS_API_KEY) {
-      return res.status(503).json({
+      return res.status(500).json({
         success: false,
-        code: "PEXELS_KEY_MISSING",
-        error: "Configure PEXELS_API_KEY nas variáveis do Render."
+        error: "Configure PEXELS_API_KEY no Render."
       });
     }
 
-    const query = String(req.query.q || "")
-      .trim()
-      .slice(0, 120);
-
-    if (!query) {
-      return res.status(400).json({
-        success: false,
-        error: "Digite um tema para buscar vídeos."
-      });
-    }
-
-    const perPage = Math.max(
-      1,
-      Math.min(12, Number(req.query.per_page) || 8)
+    const q = String(req.query.q || "shopping product").slice(0, 120);
+    const perPage = Math.min(
+      15,
+      Math.max(1, Number(req.query.per_page) || 8)
     );
 
-    const orientacoes = ["portrait", "landscape", "square"];
-
-    const orientation = orientacoes.includes(
-      String(req.query.orientation || "portrait")
+    const orientacaoPermitida = ["landscape", "portrait", "square"];
+    const orientacao = orientacaoPermitida.includes(
+      String(req.query.orientation)
     )
-      ? String(req.query.orientation || "portrait")
+      ? String(req.query.orientation)
       : "portrait";
 
-    const url = new URL(
-      "https://api.pexels.com/v1/videos/search"
-    );
-
-    url.searchParams.set("query", query);
-    url.searchParams.set("per_page", String(perPage));
-    url.searchParams.set("orientation", orientation);
-    url.searchParams.set("locale", "pt-BR");
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: PEXELS_API_KEY
-      },
-      signal: AbortSignal.timeout(20000)
+    const parametros = new URLSearchParams({
+      query: q,
+      per_page: String(perPage),
+      orientation: orientacao
     });
 
-    const data = await response.json().catch(() => ({}));
+    const resposta = await fetch(
+      `https://api.pexels.com/videos/search?${parametros}`,
+      {
+        headers: {
+          Authorization: PEXELS_API_KEY
+        },
+        signal: AbortSignal.timeout(20000)
+      }
+    );
 
-    if (!response.ok) {
-      console.error("Erro Pexels:", response.status, data);
+    const dados = await resposta.json();
 
-      return res.status(
-        response.status === 429 ? 429 : 502
-      ).json({
+    if (!resposta.ok) {
+      console.error("Erro Pexels:", resposta.status, dados);
+
+      return res.status(resposta.status).json({
         success: false,
-        error:
-          response.status === 401
-            ? "A chave do Pexels é inválida."
-            : response.status === 429
-              ? "Limite de buscas atingido. Tente novamente mais tarde."
-              : "Não foi possível pesquisar vídeos no Pexels."
+        error: "Não foi possível pesquisar vídeos no Pexels."
       });
     }
 
-    const videos = (data.videos || [])
-      .map(v => {
-        const files = (v.video_files || [])
-          .filter(f => {
+    const videos = (dados.videos || []).map((video) => {
+      const arquivos = (video.video_files || [])
+        .filter((arquivo) => {
+          try {
+            const u = new URL(arquivo.link);
             return (
-              f.link &&
-              f.file_type === "video/mp4" &&
-              f.width &&
-              f.height
+              u.protocol === "https:" &&
+              /(^|\.)pexels\.com$/i.test(u.hostname) &&
+              u.hostname.toLowerCase() === "videos.pexels.com"
             );
-          })
-          .sort((a, b) => {
-            const aScore =
-              Math.abs(a.width - 720) +
-              Math.abs(a.height - 1280);
+          } catch {
+            return false;
+          }
+        })
+        .sort((a, b) => {
+          const aScore =
+            (a.width || 0) <= 1080 ? 1 : 0;
+          const bScore =
+            (b.width || 0) <= 1080 ? 1 : 0;
+          return bScore - aScore;
+        });
 
-            const bScore =
-              Math.abs(b.width - 720) +
-              Math.abs(b.height - 1280);
+      const arquivo = arquivos[0];
 
-            return aScore - bScore;
-          });
+      return {
+        id: video.id,
+        duracao: video.duration,
+        largura: video.width,
+        altura: video.height,
+        fotografo: video.user?.name || "",
+        pagina: video.url,
+        preview: video.image,
+        video_file: arquivo?.link || null,
+        largura_video: arquivo?.width || null,
+        altura_video: arquivo?.height || null
+      };
+    }).filter((video) => video.video_file);
 
-        const file =
-          files.find(f => f.width <= 1080) ||
-          files[0];
-
-        return {
-          id: v.id,
-          url: v.url,
-          image: v.image,
-          duration: v.duration,
-          width: v.width,
-          height: v.height,
-          photographer: v.user?.name || "Criador Pexels",
-          photographer_url:
-            v.user?.url || "https://www.pexels.com/",
-          video_file: file?.link || ""
-        };
-      })
-      .filter(v => v.video_file);
-
-    return res.json({
+    res.json({
       success: true,
-      total: data.total_results || videos.length,
-      query,
-      videos,
-      pexels_url:
-        `https://www.pexels.com/search/videos/${encodeURIComponent(query)}/`
+      total: videos.length,
+      videos
     });
   } catch (error) {
     console.error("Erro Pexels:", error.message);
 
-    return res.status(502).json({
+    res.status(500).json({
       success: false,
-      error: "Falha ao consultar o Pexels."
+      error: "Erro ao pesquisar vídeos gratuitos.",
+      detalhes: error.message
     });
   }
 });
 
-// ==========================================
-// CONSULTAR VOZES ELEVENLABS
-// ==========================================
+/* =====================================================
+   PEXELS — PROXY PARA REPRODUÇÃO DOS VÍDEOS
+===================================================== */
+
+app.get("/api/video-pexels", async (req, res) => {
+  try {
+    const url = new URL(String(req.query.url || ""));
+
+    if (
+      url.protocol !== "https:" ||
+      url.hostname.toLowerCase() !== "videos.pexels.com"
+    ) {
+      return res.status(400).send("URL de vídeo não permitida.");
+    }
+
+    const headers = {};
+
+    if (req.headers.range) {
+      headers.Range = req.headers.range;
+    }
+
+    const upstream = await fetch(url.toString(), {
+      headers,
+      redirect: "follow",
+      signal: AbortSignal.timeout(30000)
+    });
+
+    const finalUrl = new URL(upstream.url);
+
+    if (
+      finalUrl.protocol !== "https:" ||
+      finalUrl.hostname.toLowerCase() !== "videos.pexels.com"
+    ) {
+      return res.status(400).send("Redirecionamento não permitido.");
+    }
+
+    if (!upstream.ok || !upstream.body) {
+      return res.status(upstream.status || 502).send(
+        "Não foi possível carregar o vídeo."
+      );
+    }
+
+    res.setHeader(
+      "Content-Type",
+      upstream.headers.get("content-type") || "video/mp4"
+    );
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+
+    const contentLength = upstream.headers.get("content-length");
+    const contentRange = upstream.headers.get("content-range");
+
+    if (contentLength) {
+      res.setHeader("Content-Length", contentLength);
+    }
+
+    if (contentRange) {
+      res.setHeader("Content-Range", contentRange);
+    }
+
+    res.status(upstream.status === 206 ? 206 : 200);
+
+    Readable.fromWeb(upstream.body).pipe(res);
+  } catch (error) {
+    console.error("Erro no proxy de vídeo:", error.message);
+
+    if (!res.headersSent) {
+      res.status(500).send("Erro ao carregar o vídeo.");
+    }
+  }
+});
+
+/* =====================================================
+   ELEVENLABS — LISTA DE VOZES
+===================================================== */
 
 app.get("/api/voz/vozes", async (req, res) => {
   try {
     if (!ELEVENLABS_API_KEY) {
-      return res.status(503).json({
+      return res.status(500).json({
         success: false,
         error: "Configure ELEVENLABS_API_KEY no Render."
       });
@@ -452,18 +453,16 @@ app.get("/api/voz/vozes", async (req, res) => {
       }
     );
 
-    const dados = await resposta.json().catch(() => ({}));
+    const dados = await resposta.json();
 
     if (!resposta.ok) {
-      console.error("Erro ElevenLabs:", resposta.status, dados);
-
-      return res.status(502).json({
+      return res.status(resposta.status).json({
         success: false,
-        error: "Não foi possível consultar as vozes da ElevenLabs."
+        error: "Não foi possível carregar as vozes."
       });
     }
 
-    const vozes = (dados.voices || []).map(voz => ({
+    const vozes = (dados.voices || []).map((voz) => ({
       voice_id: voz.voice_id,
       name: voz.name,
       category: voz.category || "",
@@ -476,23 +475,23 @@ app.get("/api/voz/vozes", async (req, res) => {
       vozes
     });
   } catch (error) {
-    console.error("Erro nas vozes:", error.message);
+    console.error("Erro ao listar vozes:", error.message);
 
-    res.status(502).json({
+    res.status(500).json({
       success: false,
-      error: "Falha ao consultar as vozes."
+      error: "Erro ao carregar as vozes."
     });
   }
 });
 
-// ==========================================
-// GERAR NARRAÇÃO MP3
-// ==========================================
+/* =====================================================
+   ELEVENLABS — GERAR NARRAÇÃO
+===================================================== */
 
 app.post("/api/voz/narrar", async (req, res) => {
   try {
     if (!ELEVENLABS_API_KEY) {
-      return res.status(503).json({
+      return res.status(500).json({
         success: false,
         error: "Configure ELEVENLABS_API_KEY no Render."
       });
@@ -501,41 +500,39 @@ app.post("/api/voz/narrar", async (req, res) => {
     const texto = String(req.body?.texto || "").trim();
     const voiceId = String(req.body?.voice_id || "").trim();
 
-    if (!texto) {
+    if (!texto || !voiceId) {
       return res.status(400).json({
         success: false,
-        error: "Digite o texto da narração."
+        error: "Informe o texto e o ID da voz."
       });
     }
 
-    if (texto.length > 1200) {
+    if (texto.length > 5000) {
       return res.status(400).json({
         success: false,
-        error: "A narração deve ter no máximo 1200 caracteres."
+        error: "O texto deve ter no máximo 5000 caracteres."
       });
     }
 
-    if (!voiceId || !/^[a-zA-Z0-9_-]+$/.test(voiceId)) {
+    if (!/^[a-zA-Z0-9_-]{1,100}$/.test(voiceId)) {
       return res.status(400).json({
         success: false,
-        error: "Selecione uma voz válida."
+        error: "ID de voz inválido."
       });
     }
 
     const resposta = await fetch(
-      "https://api.elevenlabs.io/v1/text-to-speech/" +
-        encodeURIComponent(voiceId) +
-        "?output_format=mp3_44100_128",
+      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`,
       {
         method: "POST",
         headers: {
           "xi-api-key": ELEVENLABS_API_KEY,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Accept: "audio/mpeg"
         },
         body: JSON.stringify({
           text: texto,
           model_id: "eleven_multilingual_v2",
-          language_code: "pt",
           voice_settings: {
             stability: 0.45,
             similarity_boost: 0.75
@@ -546,45 +543,39 @@ app.post("/api/voz/narrar", async (req, res) => {
     );
 
     if (!resposta.ok) {
-      const detalhe = await resposta.text();
+      const detalhes = await resposta.text();
 
       console.error(
         "Erro ElevenLabs:",
         resposta.status,
-        detalhe
+        detalhes.slice(0, 1000)
       );
 
-      return res.status(502).json({
+      return res.status(resposta.status).json({
         success: false,
-        error:
-          "A ElevenLabs não gerou o áudio. Confira sua conta, " +
-          "os créditos disponíveis e a voz selecionada."
+        error: "Não foi possível gerar a narração. Verifique a conta e os créditos disponíveis."
       });
     }
 
-    const audio = Buffer.from(await resposta.arrayBuffer());
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Cache-Control", "no-store");
 
-    res.set({
-      "Content-Type": "audio/mpeg",
-      "Content-Length": String(audio.length),
-      "Cache-Control": "no-store"
-    });
-
-    return res.send(audio);
+    Readable.fromWeb(resposta.body).pipe(res);
   } catch (error) {
-    console.error("Erro ao gerar narração:", error.message);
+    console.error("Erro na narração:", error.message);
 
-    res.status(502).json({
+    res.status(500).json({
       success: false,
-      error: "Erro ao gerar a narração."
+      error: "Erro ao gerar narração.",
+      detalhes: error.message
     });
   }
 });
 
-// ==========================================
-// INICIAR SERVIDOR
-// ==========================================
+/* =====================================================
+   INICIALIZAÇÃO
+===================================================== */
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Servidor iniciado na porta ${PORT}`);
 });
