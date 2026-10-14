@@ -2,615 +2,417 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shopee Ranking</title>
-
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #222;
-    }
-
-    header {
-      background: #ee4d2d;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-
-    header h1 { margin: 0 0 6px; font-size: 28px; }
-    header p { margin: 0; opacity: .95; }
-
-    .container { max-width: 1200px; margin: auto; padding: 20px; }
-
-    .filtros, .resumo, .criador {
-      background: white;
-      padding: 18px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-    }
-
-    .filtros h2, .criador h2 { margin-top: 0; }
-
-    .grid-filtros {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-    }
-
-    label { font-weight: bold; font-size: 14px; }
-
-    input, select, textarea, button {
-      width: 100%;
-      padding: 11px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      margin-top: 5px;
-      font-family: inherit;
-    }
-
-    textarea { resize: vertical; line-height: 1.5; }
-
-    button { cursor: pointer; border: none; font-weight: bold; }
-
-    button:disabled { opacity: .6; cursor: wait; }
-
-    .btn-atualizar, .btn-principal {
-      background: #ee4d2d;
-      color: white;
-    }
-
-    .btn-limpar { background: #555; color: white; }
-
-    .acoes {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .produtos {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 18px;
-    }
-
-    .produto {
-      background: white;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,.08);
-    }
-
-    .produto img {
-      width: 100%;
-      height: 240px;
-      object-fit: contain;
-      background: #fafafa;
-    }
-
-    .conteudo { padding: 15px; }
-
-    .produto h3 {
-      font-size: 16px;
-      margin: 0 0 10px;
-      line-height: 1.4;
-    }
-
-    .indicador {
-      display: inline-block;
-      padding: 6px 9px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .alta { background: #d9f7df; color: #147a2d; }
-    .boa { background: #fff0c2; color: #8a6500; }
-    .volume { background: #dcecff; color: #175a9c; }
-    .outros { background: #eee; color: #555; }
-
-    .dados {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin: 12px 0;
-    }
-
-    .dado {
-      background: #f7f7f7;
-      padding: 8px;
-      border-radius: 7px;
-      font-size: 13px;
-    }
-
-    .dado strong {
-      display: block;
-      font-size: 15px;
-      margin-top: 2px;
-      overflow-wrap: anywhere;
-    }
-
-    .loja { font-size: 13px; color: #666; margin-bottom: 12px; }
-
-    .btn-produto {
-      display: block;
-      text-align: center;
-      background: #ee4d2d;
-      color: white;
-      text-decoration: none;
-      padding: 11px;
-      border-radius: 8px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .btn-copiar { background: #222; color: white; }
-
-    .carregando, .erro, .vazio {
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .erro { color: #c00; }
-
-    .criador .campo { margin-bottom: 14px; }
-
-    .ajuda {
-      color: #666;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    #statusVoz {
-      padding: 12px;
-      margin: 12px 0;
-      border-radius: 8px;
-      background: #f7f7f7;
-      font-size: 14px;
-      line-height: 1.5;
-      overflow-wrap: anywhere;
-    }
-
-    #audioGerado {
-      width: 100%;
-      margin-top: 12px;
-    }
-
-    #baixarAudio {
-      display: none;
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #222;
-      color: white;
-      text-decoration: none;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    @media (max-width: 600px) {
-      header h1 { font-size: 23px; }
-      .container { padding: 12px; }
-      .acoes { grid-template-columns: 1fr; }
-      .produto img { height: 220px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopee Ranking e Criador de Vídeos</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
+header{background:#ee4d2d;color:white;padding:20px;text-align:center}
+header h1{margin:0 0 6px;font-size:26px}
+.container{max-width:1200px;margin:auto;padding:16px}
+section,.produto{background:white;border-radius:12px;padding:16px;margin-bottom:18px;box-shadow:0 2px 8px #0001}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+label{font-size:14px;font-weight:bold}
+input,select,textarea,button{width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;margin-top:5px;font:inherit}
+button{border:0;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.55}
+.principal{background:#ee4d2d;color:white}
+.secundario{background:#252525;color:white}
+.produtos{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.produto{padding:0;overflow:hidden;margin:0}
+.produto img{width:100%;height:220px;object-fit:contain;background:#fafafa}
+.conteudo{padding:14px}
+.conteudo h3{font-size:16px;line-height:1.4}
+.dados{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dado{padding:8px;background:#f5f5f5;border-radius:7px;font-size:13px}
+.dado strong{display:block;margin-top:4px;overflow-wrap:anywhere}
+.link{display:block;text-align:center;padding:11px;background:#ee4d2d;color:white;text-decoration:none;border-radius:8px;margin:8px 0;font-weight:bold}
+.ajuda{font-size:13px;line-height:1.5;color:#666}
+.status{padding:12px;border-radius:8px;background:#f5f5f5;line-height:1.5;overflow-wrap:anywhere;margin:12px 0}
+audio,video{width:100%;margin-top:12px}
+#baixarAudio,#baixarVideo{display:none}
+#baixarAudio,#baixarVideo{display:none;background:#222;color:white;text-align:center;text-decoration:none;padding:12px;border-radius:8px;margin-top:10px}
+#compartilharVideo{display:none;background:#087f5b;color:white;margin-top:10px}
+#canvasVideo{display:none;width:100%;max-width:360px;margin:12px auto}
+.indicador{font-size:12px;font-weight:bold;color:#147a2d}
+.acoes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:600px){.acoes{grid-template-columns:1fr}.container{padding:10px}}
+</style>
 </head>
-
 <body>
 <header>
-  <h1>🛍️ Shopee Ranking</h1>
-  <p>Produtos mais vendidos para afiliados</p>
+<h1>🛍️ Shopee Ranking</h1>
+<p>Produtos para afiliados e criador de vídeos</p>
 </header>
 
 <div class="container">
+<section>
+<h2>🔎 Filtros de produtos</h2>
+<div class="grid">
+<div><label for="pesquisa">Pesquisar produto</label><input id="pesquisa" placeholder="Tênis, celular..."></div>
+<div><label for="vendasMin">Vendas mínimas</label><input id="vendasMin" type="number" placeholder="500"></div>
+<div><label for="comissaoMin">Comissão mínima (%)</label><input id="comissaoMin" type="number" step=".01" placeholder="10"></div>
+<div><label for="precoMax">Preço máximo (R$)</label><input id="precoMax" type="number" step=".01" placeholder="100"></div>
+<div><label for="ordenacao">Ordenar por</label>
+<select id="ordenacao">
+<option value="vendas">🔥 Mais vendidos</option>
+<option value="comissao">💰 Maior comissão (%)</option>
+<option value="valorComissao">💵 Maior valor de comissão</option>
+<option value="precoMenor">💲 Menor preço</option>
+<option value="avaliacao">⭐ Melhor avaliação</option>
+</select></div>
+</div>
+<div class="acoes">
+<button class="principal" onclick="carregarProdutos()">🔄 Atualizar produtos</button>
+<button class="secundario" onclick="limparFiltros()">🧹 Limpar filtros</button>
+</div>
+</section>
 
-  <section class="filtros">
-    <h2>🔎 Filtros</h2>
+<section id="criador">
+<h2>🎬 Criador de vídeos com IA</h2>
+<p class="ajuda">Escolha um produto, gere a narração e monte um vídeo vertical. Depois, confira e salve o arquivo para publicar manualmente no Shopee Video.</p>
+<label for="produtoEscolhido">Produto escolhido</label>
+<input id="produtoEscolhido" readonly placeholder="Escolha um produto na lista abaixo">
 
-    <div class="grid-filtros">
-      <div>
-        <label for="pesquisa">Pesquisar produto</label>
-        <input type="text" id="pesquisa" placeholder="Ex.: tênis, celular...">
-      </div>
+<div style="margin-top:14px">
+<label for="vozEscolhida">Voz da narração</label>
+<select id="vozEscolhida"><option value="">Carregando vozes...</option></select>
+</div>
 
-      <div>
-        <label for="vendasMin">Vendas mínimas</label>
-        <input type="number" id="vendasMin" placeholder="Ex.: 500">
-      </div>
+<div style="margin-top:14px">
+<label for="textoNarracao">Texto da narração</label>
+<textarea id="textoNarracao" rows="5" maxlength="1200">Olha esse achadinho da Shopee! Um produto que pode facilitar seu dia a dia, com preço que chama atenção. Confira os detalhes e aproveite a oferta enquanto estiver disponível!</textarea>
+<p class="ajuda">Dica: textos curtos funcionam melhor em vídeos de aproximadamente 15 segundos.</p>
+</div>
 
-      <div>
-        <label for="comissaoMin">Comissão mínima (%)</label>
-        <input type="number" id="comissaoMin" placeholder="Ex.: 20" step="0.01">
-      </div>
+<button id="btnVoz" class="principal" onclick="gerarNarracao()">🎧 Gerar narração</button>
+<div id="statusVoz" class="status" role="status">Carregando as vozes...</div>
+<audio id="audioGerado" controls style="display:none"></audio>
+<a id="baixarAudio" href="#" download="narracao-shopee.mp3">⬇️ Baixar narração MP3</a>
 
-      <div>
-        <label for="precoMax">Preço máximo (R$)</label>
-        <input type="number" id="precoMax" placeholder="Ex.: 100" step="0.01">
-      </div>
+<hr style="border:0;border-top:1px solid #eee;margin:24px 0">
+<h3>📱 Montagem do vídeo</h3>
+<p class="ajuda">O vídeo combina a foto do produto, o preço, textos promocionais e a narração. A gravação depende do suporte do navegador.</p>
+<button id="btnVideo" class="principal" onclick="criarVideo()" disabled>🎞️ Criar vídeo vertical 9:16</button>
+<div id="statusVideo" class="status">Escolha um produto e gere a narração primeiro.</div>
+<canvas id="canvasVideo" width="720" height="1280"></canvas>
+<video id="videoGerado" controls playsinline style="display:none"></video>
+<a id="baixarVideo" href="#" download="achadinho.mp4">⬇️ Salvar vídeo</a>
+<button id="compartilharVideo" onclick="compartilharVideo()">📤 Compartilhar vídeo</button>
+</section>
 
-      <div>
-        <label for="ordenacao">Ordenar por</label>
-        <select id="ordenacao">
-          <option value="vendas">🔥 Mais vendidos</option>
-          <option value="comissao">💰 Maior comissão (%)</option>
-          <option value="valorComissao">💵 Maior valor de comissão</option>
-          <option value="precoMenor">💲 Menor preço</option>
-          <option value="avaliacao">⭐ Melhor avaliação</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="acoes">
-      <button class="btn-atualizar" onclick="carregarProdutos()">🔄 Atualizar produtos</button>
-      <button class="btn-limpar" onclick="limparFiltros()">🧹 Limpar filtros</button>
-    </div>
-  </section>
-
-  <section class="criador">
-    <h2>🎙️ Criador de narração com IA</h2>
-    <p class="ajuda">
-      Primeiro vamos gerar e testar o áudio. Depois vamos integrar a narração
-      ao vídeo vertical dos produtos.
-    </p>
-
-    <div class="campo">
-      <label for="vozEscolhida">Escolha a voz</label>
-      <select id="vozEscolhida">
-        <option value="">Carregando vozes...</option>
-      </select>
-    </div>
-
-    <div class="campo">
-      <label for="textoNarracao">Texto da narração</label>
-      <textarea id="textoNarracao" rows="5" maxlength="1200">Olha esse achadinho da Shopee! Um produto que pode facilitar seu dia a dia, com preço que chama atenção. Confira os detalhes e aproveite a oferta enquanto estiver disponível!</textarea>
-      <p class="ajuda">Limite: 1.200 caracteres. Textos curtos costumam funcionar melhor em vídeos de 15 segundos.</p>
-    </div>
-
-    <button id="btnGerarVoz" class="btn-principal" onclick="gerarNarracao()">
-      🎧 Gerar narração
-    </button>
-
-    <div id="statusVoz" role="status" aria-live="polite">
-      ⏳ Carregando as vozes disponíveis...
-    </div>
-
-    <audio id="audioGerado" controls style="display:none"></audio>
-    <a id="baixarAudio" href="#" download="narracao-shopee.mp3">⬇️ Baixar narração em MP3</a>
-  </section>
-
-  <section class="resumo">
-    <strong>📦 Produtos encontrados: <span id="total">0</span></strong>
-  </section>
-
-  <div id="resultado">
-    <div class="carregando">⏳ Carregando produtos...</div>
-  </div>
+<section><strong>📦 Produtos encontrados: <span id="total">0</span></strong></section>
+<div id="resultado"><p>⏳ Carregando produtos...</p></div>
 </div>
 
 <script>
 "use strict";
 
-let todosProdutos = [];
-let urlAudioAtual = null;
+let todosProdutos=[];
+let produtosExibidos=[];
+let produtoAtual=null;
+let urlAudio=null;
+let urlVideo=null;
+let audioContext=null;
+let audioSource=null;
+let ganhoAudio=null;
 
-function definirIndicador(produto) {
-  const vendas = Number(produto.sales || 0);
-  const comissao = Number(produto.commissionRate || 0) * 100;
+const el=id=>document.getElementById(id);
+const dinheiro=n=>Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const escapar=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
-  if (vendas >= 500 && comissao >= 20) {
-    return { classe: "alta", texto: "🟢 Alta combinação" };
-  }
-  if (vendas >= 100 && comissao >= 10) {
-    return { classe: "boa", texto: "🟡 Boa combinação" };
-  }
-  if (vendas >= 1000) {
-    return { classe: "volume", texto: "🔵 Volume alto" };
-  }
-  return { classe: "outros", texto: "⚪ Outros" };
-}
-
-function escaparHTML(valor) {
-  return String(valor ?? "").replace(/[&<>"']/g, caractere => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[caractere]);
-}
-
-async function carregarProdutos() {
-  const resultado = document.getElementById("resultado");
-  resultado.innerHTML = '<div class="carregando">⏳ Carregando produtos da Shopee...</div>';
-
-  try {
-    const resposta = await fetch("/api/produtos");
-    const dados = await resposta.json();
-
-    if (!resposta.ok || !dados.success) {
-      throw new Error(dados.error || "Erro ao carregar produtos.");
-    }
-
-    todosProdutos = dados.produtos || [];
-    aplicarFiltros();
-  } catch (erro) {
-    console.error(erro);
-    resultado.innerHTML = `<div class="erro">❌ Erro ao carregar produtos.<br><br>${escaparHTML(erro.message)}</div>`;
-  }
-}
-
-function aplicarFiltros() {
-  const pesquisa = document.getElementById("pesquisa").value.toLowerCase().trim();
-  const vendasMin = Number(document.getElementById("vendasMin").value) || 0;
-  const comissaoMin = Number(document.getElementById("comissaoMin").value) || 0;
-  const precoMax = document.getElementById("precoMax").value === ""
-    ? Infinity : Number(document.getElementById("precoMax").value);
-  const ordenacao = document.getElementById("ordenacao").value;
-
-  let produtos = todosProdutos.filter(produto => {
-    const nome = String(produto.productName || "").toLowerCase();
-    const vendas = Number(produto.sales || 0);
-    const comissao = Number(produto.commissionRate || 0) * 100;
-    const preco = Number(produto.priceMin || 0);
-
-    return (!pesquisa || nome.includes(pesquisa)) &&
-      vendas >= vendasMin &&
-      comissao >= comissaoMin &&
-      preco <= precoMax;
-  });
-
-  produtos.sort((a, b) => {
-    if (ordenacao === "vendas") return Number(b.sales || 0) - Number(a.sales || 0);
-    if (ordenacao === "comissao") return Number(b.commissionRate || 0) - Number(a.commissionRate || 0);
-    if (ordenacao === "valorComissao") return Number(b.commission || 0) - Number(a.commission || 0);
-    if (ordenacao === "precoMenor") return Number(a.priceMin || 0) - Number(b.priceMin || 0);
-    if (ordenacao === "avaliacao") return Number(b.ratingStar || 0) - Number(a.ratingStar || 0);
-    return 0;
-  });
-
-  document.getElementById("total").textContent = produtos.length;
-  renderizarProdutos(produtos);
-}
-
-function renderizarProdutos(produtos) {
-  const resultado = document.getElementById("resultado");
-
-  if (!produtos.length) {
-    resultado.innerHTML = '<div class="vazio">🔎 Nenhum produto encontrado com esses filtros.</div>';
-    return;
-  }
-
-  resultado.innerHTML = '<div class="produtos">' + produtos.map((produto, indice) => {
-    const indicador = definirIndicador(produto);
-    const vendas = Number(produto.sales || 0);
-    const comissaoPercentual = Number(produto.commissionRate || 0) * 100;
-    const valorComissao = Number(produto.commission || 0);
-    const precoMin = Number(produto.priceMin || 0);
-    const precoMax = Number(produto.priceMax || 0);
-    const avaliacao = Number(produto.ratingStar || 0);
-    const desconto = Number(produto.priceDiscountRate || 0);
-    const precoTexto = precoMin === precoMax
-      ? `R$ ${precoMin.toFixed(2)}`
-      : `R$ ${precoMin.toFixed(2)} - R$ ${precoMax.toFixed(2)}`;
-
-    const link = produto.offerLink || produto.productLink || "";
-    const imagem = produto.imageUrl || "";
-    const nome = produto.productName || "Produto sem nome";
-    const loja = produto.shopName || "Loja não informada";
-
-    return `
-      <article class="produto">
-        <img src="${escaparHTML(imagem)}" alt="${escaparHTML(nome)}" loading="lazy">
-        <div class="conteudo">
-          <span class="indicador ${indicador.classe}">${indicador.texto}</span>
-          <h3>${escaparHTML(nome)}</h3>
-          <div class="dados">
-            <div class="dado">🔥 Vendas<strong>${vendas.toLocaleString("pt-BR")}</strong></div>
-            <div class="dado">💰 Comissão<strong>${comissaoPercentual.toFixed(2)}%</strong></div>
-            <div class="dado">💵 Valor comissão<strong>R$ ${valorComissao.toFixed(2)}</strong></div>
-            <div class="dado">💲 Preço<strong>${precoTexto}</strong></div>
-            <div class="dado">⭐ Avaliação<strong>${avaliacao.toFixed(1)}</strong></div>
-            <div class="dado">🏷️ Desconto<strong>${desconto}%</strong></div>
-          </div>
-          <div class="loja">🏪 ${escaparHTML(loja)}</div>
-          <a class="btn-produto" href="${escaparHTML(link || "#")}" target="_blank" rel="noopener noreferrer">🛒 Ver produto / Afiliado</a>
-          <button class="btn-copiar" onclick="copiarLinkPorIndice(${indice}, this)">🔗 Copiar link de afiliado</button>
-          <button style="background:#333;color:white;margin-top:8px" onclick="usarProdutoNaNarracao(${indice})">🎬 Usar produto na narração</button>
-        </div>
-      </article>`;
-  }).join("") + "</div>";
-
-  // Guarda a lista atualmente exibida para os botões de cada produto.
-  window.produtosExibidos = produtos;
-}
-
-async function copiarLinkPorIndice(indice, botao) {
-  const produtos = window.produtosExibidos || [];
-  const produto = produtos[indice];
-  if (!produto) return;
-
-  const link = produto.offerLink || produto.productLink || "";
-  if (!link) {
-    alert("Este produto não tem link disponível.");
-    return;
-  }
-
-  try {
-    await navigator.clipboard.writeText(link);
-    alert("✅ Link de afiliado copiado!");
-  } catch (erro) {
-    const area = document.createElement("textarea");
-    area.value = link;
-    document.body.appendChild(area);
-    area.select();
-    document.execCommand("copy");
-    area.remove();
-    alert("✅ Link de afiliado copiado!");
-  }
-}
-
-function usarProdutoNaNarracao(indice) {
-  const produto = (window.produtosExibidos || [])[indice];
-  if (!produto) return;
-
-  const nome = produto.productName || "este achadinho";
-  const preco = Number(produto.priceMin || 0).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  });
-
-  document.getElementById("textoNarracao").value =
-    `Olha esse achadinho da Shopee! ${nome}. O preço começa em ${preco}. Confira os detalhes e veja se essa oferta combina com você!`;
-
-  document.querySelector(".criador").scrollIntoView({ behavior: "smooth" });
-}
-
-function limparFiltros() {
-  document.getElementById("pesquisa").value = "";
-  document.getElementById("vendasMin").value = "";
-  document.getElementById("comissaoMin").value = "";
-  document.getElementById("precoMax").value = "";
-  document.getElementById("ordenacao").value = "vendas";
+async function carregarProdutos(){
+ el("resultado").innerHTML="<p>⏳ Carregando produtos da Shopee...</p>";
+ try{
+  const r=await fetch("/api/produtos");
+  const d=await r.json();
+  if(!r.ok||!d.success)throw new Error(d.error||"Falha ao consultar produtos.");
+  todosProdutos=d.produtos||[];
   aplicarFiltros();
+ }catch(e){
+  el("resultado").innerHTML='<section>❌ Erro ao carregar produtos: '+escapar(e.message)+'</section>';
+ }
 }
 
-/* VOZES DA ELEVENLABS */
+function aplicarFiltros(){
+ const busca=el("pesquisa").value.toLowerCase().trim();
+ const vendas=Number(el("vendasMin").value)||0;
+ const comissao=Number(el("comissaoMin").value)||0;
+ const preco=el("precoMax").value===""?Infinity:Number(el("precoMax").value);
+ const ordem=el("ordenacao").value;
 
-async function carregarVozes() {
-  const seletor = document.getElementById("vozEscolhida");
-  const status = document.getElementById("statusVoz");
+ produtosExibidos=todosProdutos.filter(p=>
+  (!busca||String(p.productName||"").toLowerCase().includes(busca))&&
+  Number(p.sales||0)>=vendas&&
+  Number(p.commissionRate||0)*100>=comissao&&
+  Number(p.priceMin||0)<=preco
+ );
 
-  try {
-    const resposta = await fetch("/api/voz/vozes");
-    const dados = await resposta.json();
-
-    if (!resposta.ok || !dados.success) {
-      throw new Error(dados.error || "Não foi possível carregar as vozes.");
-    }
-
-    const vozes = dados.vozes || [];
-    seletor.innerHTML = "";
-
-    if (!vozes.length) {
-      throw new Error("A API não retornou nenhuma voz.");
-    }
-
-    vozes.forEach(voz => {
-      const opcao = document.createElement("option");
-      opcao.value = voz.voice_id;
-      opcao.textContent = voz.name;
-      seletor.appendChild(opcao);
-    });
-
-    // Liam é a opção inicial para testar conteúdo de redes sociais.
-    const vozPreferida = "TX3LPaxmHKxFdv7VOQHJ";
-    if (vozes.some(voz => voz.voice_id === vozPreferida)) {
-      seletor.value = vozPreferida;
-    }
-
-    status.textContent = `✅ ${vozes.length} vozes carregadas. Escolha uma e gere a narração. A pronúncia em português será avaliada no teste.`;
-  } catch (erro) {
-    console.error(erro);
-    seletor.innerHTML = '<option value="">Erro ao carregar vozes</option>';
-    status.textContent = "❌ Erro ao carregar as vozes: " + erro.message;
-  }
+ produtosExibidos.sort((a,b)=>{
+  if(ordem==="vendas")return Number(b.sales||0)-Number(a.sales||0);
+  if(ordem==="comissao")return Number(b.commissionRate||0)-Number(a.commissionRate||0);
+  if(ordem==="valorComissao")return Number(b.commission||0)-Number(a.commission||0);
+  if(ordem==="precoMenor")return Number(a.priceMin||0)-Number(b.priceMin||0);
+  if(ordem==="avaliacao")return Number(b.ratingStar||0)-Number(a.ratingStar||0);
+  return 0;
+ });
+ el("total").textContent=produtosExibidos.length;
+ renderizarProdutos();
 }
 
-async function gerarNarracao() {
-  const botao = document.getElementById("btnGerarVoz");
-  const seletor = document.getElementById("vozEscolhida");
-  const texto = document.getElementById("textoNarracao").value.trim();
-  const status = document.getElementById("statusVoz");
-  const audio = document.getElementById("audioGerado");
-  const baixar = document.getElementById("baixarAudio");
-
-  if (!seletor.value) {
-    status.textContent = "❌ Escolha uma voz antes de continuar.";
-    return;
-  }
-
-  if (!texto) {
-    status.textContent = "❌ Digite o texto da narração.";
-    return;
-  }
-
-  if (texto.length > 1200) {
-    status.textContent = "❌ O texto ultrapassou o limite de 1.200 caracteres.";
-    return;
-  }
-
-  botao.disabled = true;
-  botao.textContent = "⏳ Gerando áudio...";
-  status.textContent = "Aguarde. A inteligência artificial está gerando a narração.";
-  baixar.style.display = "none";
-  audio.style.display = "none";
-
-  try {
-    const resposta = await fetch("/api/voz/narrar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        texto: texto,
-        voice_id: seletor.value
-      })
-    });
-
-    if (!resposta.ok) {
-      let mensagem = "Erro ao gerar a narração.";
-      try {
-        const erro = await resposta.json();
-        mensagem = erro.error || mensagem;
-      } catch (_) {}
-      throw new Error(mensagem);
-    }
-
-    const tipo = resposta.headers.get("content-type") || "";
-    if (tipo.includes("application/json")) {
-      const erro = await resposta.json();
-      throw new Error(erro.error || "A API não retornou um arquivo de áudio.");
-    }
-
-    const blob = await resposta.blob();
-    if (!blob.size) {
-      throw new Error("O arquivo de áudio recebido está vazio.");
-    }
-
-    if (urlAudioAtual) URL.revokeObjectURL(urlAudioAtual);
-    urlAudioAtual = URL.createObjectURL(blob);
-
-    audio.src = urlAudioAtual;
-    audio.style.display = "block";
-    baixar.href = urlAudioAtual;
-    baixar.style.display = "block";
-
-    status.textContent = "✅ Narração gerada! Toque no áudio para ouvir ou use o botão para baixar o MP3.";
-  } catch (erro) {
-    console.error(erro);
-    status.textContent = "❌ Não foi possível gerar a narração: " + erro.message;
-  } finally {
-    botao.disabled = false;
-    botao.textContent = "🎧 Gerar narração";
-  }
+function renderizarProdutos(){
+ if(!produtosExibidos.length){el("resultado").innerHTML="<section>Nenhum produto encontrado com esses filtros.</section>";return;}
+ el("resultado").innerHTML='<div class="produtos">'+produtosExibidos.map((p,i)=>{
+  const com=Number(p.commissionRate||0)*100;
+  const pmin=Number(p.priceMin||0),pmax=Number(p.priceMax||0);
+  const faixa=pmin===pmax?dinheiro(pmin):dinheiro(pmin)+" - "+dinheiro(pmax);
+  const link=p.offerLink||p.productLink||"#";
+  return `<article class="produto">
+   <img src="${escapar(p.imageUrl||"")}" alt="${escapar(p.productName||"Produto")}" loading="lazy">
+   <div class="conteudo">
+   <span class="indicador">🔥 ${Number(p.sales||0).toLocaleString("pt-BR")} vendas</span>
+   <h3>${escapar(p.productName||"Produto sem nome")}</h3>
+   <div class="dados">
+   <div class="dado">💰 Comissão<strong>${com.toFixed(2)}%</strong></div>
+   <div class="dado">💵 Comissão estimada<strong>${dinheiro(p.commission)}</strong></div>
+   <div class="dado">💲 Preço<strong>${faixa}</strong></div>
+   <div class="dado">⭐ Avaliação<strong>${Number(p.ratingStar||0).toFixed(1)}</strong></div>
+   <div class="dado">🏪 Loja<strong>${escapar(p.shopName||"Não informada")}</strong></div>
+   <div class="dado">🏷️ Desconto<strong>${Number(p.priceDiscountRate||0)}%</strong></div>
+   </div>
+   <a class="link" href="${escapar(link)}" target="_blank" rel="noopener noreferrer">🛒 Ver produto / afiliado</a>
+   <button class="secundario" onclick="copiarLink(${i})">🔗 Copiar link de afiliado</button>
+   <button class="principal" style="margin-top:8px" onclick="selecionarProduto(${i})">🎬 Escolher para o vídeo</button>
+   </div></article>`;
+ }).join("")+"</div>";
 }
 
-document.getElementById("pesquisa").addEventListener("input", aplicarFiltros);
-document.getElementById("vendasMin").addEventListener("input", aplicarFiltros);
-document.getElementById("comissaoMin").addEventListener("input", aplicarFiltros);
-document.getElementById("precoMax").addEventListener("input", aplicarFiltros);
-document.getElementById("ordenacao").addEventListener("change", aplicarFiltros);
+async function copiarLink(i){
+ const p=produtosExibidos[i];if(!p)return;
+ const link=p.offerLink||p.productLink||"";
+ if(!link){alert("Este produto não tem link disponível.");return;}
+ try{await navigator.clipboard.writeText(link);alert("Link copiado!");}
+ catch(e){const a=document.createElement("textarea");a.value=link;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove();alert("Link copiado!");}
+}
 
+function selecionarProduto(i){
+ produtoAtual=produtosExibidos[i];if(!produtoAtual)return;
+ el("produtoEscolhido").value=produtoAtual.productName||"Produto";
+ el("textoNarracao").value=`Olha esse achadinho da Shopee! ${produtoAtual.productName||"Um produto para o dia a dia"}. O preço começa em ${dinheiro(produtoAtual.priceMin)}. Confira os detalhes e veja se essa oferta combina com você!`;
+ el("statusVideo").textContent="Produto selecionado. Gere a narração e depois crie o vídeo.";
+ el("criador").scrollIntoView({behavior:"smooth"});
+}
+
+function limparFiltros(){
+ ["pesquisa","vendasMin","comissaoMin","precoMax"].forEach(id=>el(id).value="");
+ el("ordenacao").value="vendas";aplicarFiltros();
+}
+
+async function carregarVozes(){
+ try{
+  const r=await fetch("/api/voz/vozes");const d=await r.json();
+  if(!r.ok||!d.success)throw new Error(d.error||"Erro ao carregar vozes.");
+  el("vozEscolhida").innerHTML="";
+  (d.vozes||[]).forEach(v=>{
+   const o=document.createElement("option");o.value=v.voice_id;o.textContent=v.name;el("vozEscolhida").appendChild(o);
+  });
+  const preferida="TX3LPaxmHKxFdv7VOQHJ";
+  if([...el("vozEscolhida").options].some(o=>o.value===preferida))el("vozEscolhida").value=preferida;
+  el("statusVoz").textContent=`✅ ${(d.vozes||[]).length} vozes carregadas.`;
+ }catch(e){el("statusVoz").textContent="❌ Erro ao carregar vozes: "+e.message;}
+}
+
+async function gerarNarracao(){
+ const texto=el("textoNarracao").value.trim();
+ if(!el("vozEscolhida").value)return el("statusVoz").textContent="Escolha uma voz.";
+ if(!texto)return el("statusVoz").textContent="Digite o texto da narração.";
+ if(texto.length>1200)return el("statusVoz").textContent="O texto pode ter no máximo 1.200 caracteres.";
+
+ el("btnVoz").disabled=true;el("btnVoz").textContent="⏳ Gerando áudio...";
+ el("statusVoz").textContent="Aguarde enquanto a IA gera a narração.";
+ el("btnVideo").disabled=true;el("baixarAudio").style.display="none";
+ try{
+  const r=await fetch("/api/voz/narrar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({texto,voice_id:el("vozEscolhida").value})});
+  if(!r.ok){let msg="Falha ao gerar o áudio.";try{msg=(await r.json()).error||msg;}catch(_){}throw new Error(msg);}
+  const blob=await r.blob();if(!blob.size)throw new Error("O arquivo de áudio está vazio.");
+  if(urlAudio)URL.revokeObjectURL(urlAudio);
+  urlAudio=URL.createObjectURL(blob);
+  el("audioGerado").src=urlAudio;el("audioGerado").style.display="block";
+  el("baixarAudio").href=urlAudio;el("baixarAudio").style.display="block";
+  el("statusVoz").textContent="✅ Narração pronta! Ouça o áudio e depois crie o vídeo.";
+  el("btnVideo").disabled=false;
+  el("statusVideo").textContent="Áudio pronto. Toque em “Criar vídeo vertical 9:16”.";
+ }catch(e){el("statusVoz").textContent="❌ "+e.message;}
+ finally{el("btnVoz").disabled=false;el("btnVoz").textContent="🎧 Gerar narração";}
+}
+
+function carregarImagem(url){
+ return new Promise((resolve,reject)=>{
+  const img=new Image();
+  img.onload=()=>resolve(img);
+  img.onerror=()=>reject(new Error("Não foi possível carregar a imagem. Experimente outro produto."));
+  img.src="/api/imagem?url="+encodeURIComponent(url);
+ });
+}
+
+function arredondar(ctx,x,y,w,h,r){
+ ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.closePath();
+}
+
+function desenharCena(ctx,img,p,tempo,duracao){
+ const W=720,H=1280;
+ const grad=ctx.createLinearGradient(0,0,W,H);
+ grad.addColorStop(0,"#ee4d2d");grad.addColorStop(1,"#8c1e0d");
+ ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+ ctx.textAlign="center";ctx.fillStyle="#fff";
+ ctx.font="bold 42px Arial";ctx.fillText("ACHADINHO SHOPEE",360,85);
+ const frase=tempo<duracao*.4?"OLHA ESSA OFERTA!":tempo<duracao*.75?"CONFIRA OS DETALHES":"VEJA NA SHOPEE";
+ ctx.font="bold 30px Arial";ctx.fillText(frase,360,140);
+
+ ctx.save();ctx.shadowColor="#0004";ctx.shadowBlur=18;ctx.fillStyle="#fff";
+ arredondar(ctx,55,180,610,680,28);ctx.fill();ctx.restore();
+ const escala=Math.min(560/img.width,630/img.height);
+ const iw=img.width*escala,ih=img.height*escala;
+ ctx.drawImage(img,(720-iw)/2,205+(630-ih)/2,iw,ih);
+
+ const nome=String(p.productName||"Produto em destaque");
+ ctx.font="bold 29px Arial";ctx.fillStyle="#fff";
+ const palavras=nome.split(/\s+/);let linhas=[],linha="";
+ for(const palavra of palavras){
+  const tentativa=linha?linha+" "+palavra:palavra;
+  if(ctx.measureText(tentativa).width>610&&linha){linhas.push(linha);linha=palavra;}
+  else linha=tentativa;
+  if(linhas.length===3)break;
+ }
+ if(linha&&linhas.length<3)linhas.push(linha);
+ linhas.slice(0,3).forEach((l,i)=>ctx.fillText(l,360,915+i*38));
+
+ ctx.fillStyle="#ffe45e";arredondar(ctx,80,1045,560,90,20);ctx.fill();
+ ctx.fillStyle="#49170d";ctx.font="bold 40px Arial";
+ ctx.fillText("A PARTIR DE "+dinheiro(p.priceMin),360,1102);
+ ctx.fillStyle="#fff";ctx.font="bold 25px Arial";
+ ctx.fillText("CONFIRA O ANÚNCIO",360,1200);
+ ctx.font="18px Arial";ctx.fillText("Preço e disponibilidade podem mudar",360,1240);
+}
+
+async function criarVideo(){
+ if(!produtoAtual)return el("statusVideo").textContent="Escolha um produto na lista primeiro.";
+ if(!urlAudio)return el("statusVideo").textContent="Gere a narração antes de criar o vídeo.";
+ if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){
+  return el("statusVideo").textContent="Este navegador não oferece suporte à gravação de vídeo. Tente no Safari atualizado ou em um computador.";
+ }
+
+ const botao=el("btnVideo");botao.disabled=true;botao.textContent="⏳ Criando vídeo...";
+ el("statusVideo").textContent="Preparando a imagem e a gravação. Não feche esta página.";
+ let stream=null,recorder=null,raf=null;
+ try{
+  const img=await carregarImagem(produtoAtual.imageUrl||"");
+  const audio=el("audioGerado");
+  if(!Number.isFinite(audio.duration)||audio.duration<=0){
+   await new Promise((resolve,reject)=>{
+    audio.addEventListener("loadedmetadata",resolve,{once:true});
+    audio.addEventListener("error",()=>reject(new Error("Não consegui ler a duração do áudio.")),{once:true});
+    audio.load();
+   });
+  }
+  const duracao=Math.min(Math.max(audio.duration||15,5),60);
+  const canvas=el("canvasVideo"),ctx=canvas.getContext("2d");
+  if(!ctx)throw new Error("Não foi possível preparar o desenho do vídeo.");
+  desenharCena(ctx,img,produtoAtual,0,duracao);
+  canvas.style.display="block";el("videoGerado").style.display="none";
+  el("baixarVideo").style.display="none";el("compartilharVideo").style.display="none";
+
+  const videoStream=canvas.captureStream(25);
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx)throw new Error("Este navegador não oferece suporte à gravação de áudio.");
+  if(!audioContext){
+   audioContext=new AudioCtx();
+   audioSource=audioContext.createMediaElementSource(audio);
+   ganhoAudio=audioContext.createGain();
+   ganhoAudio.gain.value=1;
+   audioSource.connect(ganhoAudio);
+   ganhoAudio.connect(audioContext.destination);
+  }
+  if(audioContext.state==="suspended")await audioContext.resume();
+  const audioDestino=audioContext.createMediaStreamDestination();
+  audioSource.connect(audioDestino);
+  stream=new MediaStream([
+   ...videoStream.getVideoTracks(),
+   ...audioDestino.stream.getAudioTracks()
+  ]);
+
+  const formatos=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp8,opus","video/webm"];
+  const formato=formatos.find(f=>MediaRecorder.isTypeSupported(f))||"";
+  recorder=new MediaRecorder(stream,formato?{mimeType:formato,videoBitsPerSecond:2500000}:{});
+  const partes=[];
+  recorder.ondataavailable=e=>{if(e.data&&e.data.size)partes.push(e.data);};
+  const gravacaoTerminou=new Promise((resolve,reject)=>{
+   recorder.onstop=resolve;
+   recorder.onerror=()=>reject(new Error("O navegador interrompeu a gravação."));
+  });
+
+  let inicio=null;
+  const animar=agora=>{
+   if(inicio===null)inicio=agora;
+   const t=(agora-inicio)/1000;
+   desenharCena(ctx,img,produtoAtual,t,duracao);
+   if(t<duracao+.25)raf=requestAnimationFrame(animar);
+  };
+
+  recorder.start(250);
+  raf=requestAnimationFrame(animar);
+  audio.currentTime=0;
+  await audio.play();
+  await new Promise(resolve=>setTimeout(resolve,duracao*1000+350));
+  if(recorder.state!=="inactive")recorder.stop();
+  await gravacaoTerminou;
+  cancelAnimationFrame(raf);
+  stream.getTracks().forEach(t=>t.stop());
+
+  if(!partes.length)throw new Error("Nenhum dado de vídeo foi gravado.");
+  const tipo=recorder.mimeType||"video/webm";
+  const blob=new Blob(partes,{type:tipo});
+  if(urlVideo)URL.revokeObjectURL(urlVideo);
+  urlVideo=URL.createObjectURL(blob);
+  const video=el("videoGerado");video.src=urlVideo;video.style.display="block";
+  const ext=tipo.includes("mp4")?"mp4":"webm";
+  el("baixarVideo").href=urlVideo;
+  el("baixarVideo").download="video-achadinho."+ext;
+  el("baixarVideo").textContent="⬇️ Salvar vídeo ("+ext.toUpperCase()+")";
+  el("baixarVideo").style.display="block";
+  el("compartilharVideo").style.display="block";
+  canvas.style.display="none";
+  el("statusVideo").textContent=`✅ Vídeo criado com aproximadamente ${Math.round(duracao)} segundos. Reproduza para conferir antes de salvar.`;
+ }catch(e){
+  console.error(e);
+  el("statusVideo").textContent="❌ Não consegui criar o vídeo: "+e.message;
+ }finally{
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  if(raf)cancelAnimationFrame(raf);
+  botao.disabled=false;botao.textContent="🎞️ Criar vídeo vertical 9:16";
+ }
+}
+
+async function compartilharVideo(){
+ if(!urlVideo)return;
+ try{
+  const r=await fetch(urlVideo);const blob=await r.blob();
+  const tipo=blob.type||"video/webm";
+  const ext=tipo.includes("mp4")?"mp4":"webm";
+  const arquivo=new File([blob],"video-achadinho."+ext,{type:tipo});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[arquivo]})){
+   await navigator.share({files:[arquivo],title:"Vídeo de achadinho"});
+  }else{
+   el("statusVideo").textContent="O compartilhamento direto não está disponível. Use “Salvar vídeo” e compartilhe pelo app Arquivos ou Fotos.";
+  }
+ }catch(e){
+  if(e.name!=="AbortError")el("statusVideo").textContent="Não foi possível abrir o compartilhamento. Tente salvar o vídeo primeiro.";
+ }
+}
+
+["pesquisa","vendasMin","comissaoMin","precoMax"].forEach(id=>el(id).addEventListener("input",aplicarFiltros));
+el("ordenacao").addEventListener("change",aplicarFiltros);
 carregarProdutos();
 carregarVozes();
 </script>
