@@ -3,686 +3,459 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#111827">
-<title>Shopee Ranking | Produtos e Vídeos</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ee4d2d">
+<title>Shopee Ranking — Vídeos Dinâmicos</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#151d30;--line:#29354c;--orange:#ff6b35;--text:#f4f7fb;--muted:#aab5c8;--green:#35d49a}
+:root{--o:#ee4d2d;--bg:#f5f5f5;--ink:#242424;--muted:#666;--line:#e6e6e6}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
-header{padding:24px 16px;background:linear-gradient(130deg,#251331,#172a48);border-bottom:1px solid var(--line)}
-header h1{margin:0 0 8px;font-size:25px}
-header p{margin:0;color:#d3d9e7;font-size:14px}
-main{max-width:1100px;margin:auto;padding:16px}
-nav{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 18px}
-button,.button{border:0;border-radius:10px;background:var(--orange);color:#fff;padding:12px 15px;font-weight:bold;cursor:pointer}
-button.secondary{background:#29364d}
-button:disabled{opacity:.5;cursor:wait}
-input,select,textarea{width:100%;background:#0e1525;border:1px solid var(--line);border-radius:9px;color:white;padding:12px;font:inherit}
-label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
-h2{font-size:20px;margin:0 0 12px}
-h3{font-size:16px;margin:0 0 8px}
-.muted,.status{color:var(--muted);font-size:13px;line-height:1.5}
-.status{margin-top:10px;white-space:pre-wrap}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-top:15px}
-.product{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#101729;display:flex;flex-direction:column;min-width:0}
-.product img{width:100%;height:160px;object-fit:contain;background:#fff}
-.product-body{padding:11px;display:flex;flex-direction:column;gap:7px;flex:1}
-.product-name{font-size:13px;line-height:1.4;overflow-wrap:anywhere}
-.price{font-weight:bold;color:#ffb18d;font-size:17px}
-.meta{font-size:12px;color:var(--muted);line-height:1.5}
-.product button{margin-top:auto;padding:10px 6px;font-size:12px}
-.creator-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
-.preview-wrap{background:#05070c;border-radius:12px;overflow:hidden;max-width:360px;margin:auto;width:100%}
-canvas{display:block;width:100%;height:auto;aspect-ratio:9/16}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.actions button{flex:1}
-.notice{padding:12px;border-radius:10px;background:#101729;color:#c7d2e5;font-size:13px;line-height:1.5}
-a{color:#ffb18d}
-@media(max-width:650px){.creator-grid{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.products{grid-template-columns:repeat(2,minmax(0,1fr))}header h1{font-size:22px}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+header{padding:22px 16px;background:linear-gradient(120deg,#e83f21,#ff8051);color:white}
+header h1{margin:0 0 7px;font-size:25px}
+header p{margin:0;font-size:14px;line-height:1.5}
+main{max-width:1100px;margin:auto;padding:15px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:15px;box-shadow:0 3px 12px #00000008}
+h2{font-size:19px;margin:0 0 12px}
+p{line-height:1.5}
+.muted,.small{color:var(--muted);font-size:13px;line-height:1.5}
+.small{font-size:12px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+label{display:block;font-weight:bold;font-size:13px;margin-bottom:5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #d8d8d8;border-radius:9px;background:white;font:inherit;font-size:14px}
+textarea{min-height:90px;resize:vertical}
+button,.button{border:0;border-radius:9px;padding:11px 13px;background:var(--o);color:white;font-weight:bold;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-align:center}
+button:disabled{opacity:.55;cursor:not-allowed}
+.secondary{background:#333!important;color:white!important}
+.light{background:#fff0ea!important;color:#a8331c!important;border:1px solid #ffd4c8!important}
+.green{background:#16854a!important}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.status{background:#f2f2f2;padding:10px 12px;border-radius:9px;font-size:13px;line-height:1.5;overflow-wrap:anywhere;margin-top:12px}
+.status.error{background:#fff0ee;color:#9b2414}
+.status.success{background:#e8f8ed;color:#146a38}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}
+.product{min-width:0;background:white;border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:7px}
+.product.selected{border:2px solid var(--o);background:#fff8f5}
+.product img{width:100%;height:150px;object-fit:contain;background:#fafafa;border-radius:8px}
+.product-name{font-size:13px;font-weight:bold;line-height:1.4;overflow-wrap:anywhere}
+.price{font-size:17px;font-weight:bold;color:var(--o)}
+.meta{font-size:12px;color:var(--muted);line-height:1.5;white-space:pre-line}
+.product button,.product a{width:100%;margin-top:auto;font-size:12px;padding:9px 5px}
+.video-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.preview-wrap{width:min(100%,300px);margin:auto}
+.preview{width:100%;aspect-ratio:9/16;background:#211b1a;border-radius:15px;overflow:hidden}
+canvas{display:block;width:100%;height:100%;object-fit:contain}
+.summary{background:#fff5f0;border:1px solid #ffded3;border-radius:10px;padding:12px;margin-bottom:12px;font-size:14px;line-height:1.5}
+audio{width:100%;margin-top:10px}
+.hidden{display:none!important}
+.video-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px}
+.video-card{border:1px solid var(--line);border-radius:12px;padding:9px;min-width:0}
+.video-card video{width:100%;aspect-ratio:9/14;object-fit:cover;background:#222;border-radius:8px}
+.video-card p{font-size:12px;line-height:1.4}
+.video-card button{width:100%;margin-top:6px}
+.selected-video{border:2px solid #16854a;background:#f3fff7}
+.credit{font-size:11px;color:#555;line-height:1.4;overflow-wrap:anywhere}
+.credit a{color:#a8331c}
+@media(min-width:760px){.video-layout{grid-template-columns:300px minmax(0,1fr);align-items:start}}
 </style>
 </head>
 <body>
 <header>
-  <h1>🛍️ Shopee Ranking</h1>
-  <p>Encontre produtos e crie vídeos promocionais a partir das fotos.</p>
+<h1>🛍️ Shopee Ranking</h1>
+<p>Ranking de ofertas e criador de vídeos dinâmicos com vídeos Pexels, música e narração.</p>
 </header>
-
 <main>
-<nav>
-  <button onclick="document.getElementById('ranking').scrollIntoView({behavior:'smooth'})">📊 Ranking</button>
-  <button class="secondary" onclick="document.getElementById('criador').scrollIntoView({behavior:'smooth'})">🎬 Criar vídeo</button>
-</nav>
-
-<section id="ranking" class="panel">
-  <h2>📈 Produtos em destaque</h2>
-  <p class="muted">Carregue os produtos da API e ordene por vendas ou comissão, conforme os dados disponíveis.</p>
-  <div class="controls">
-    <div>
-      <label for="searchProduct">Buscar produto</label>
-      <input id="searchProduct" placeholder="Digite o nome do produto">
-    </div>
-    <div>
-      <label for="sortProducts">Ordenar por</label>
-      <select id="sortProducts">
-        <option value="commission">Maior comissão</option>
-        <option value="sales">Mais vendidos</option>
-        <option value="price">Menor preço</option>
-        <option value="rating">Melhor avaliação</option>
-        <option value="discount">Maior desconto</option>
-      </select>
-    </div>
-  </div>
-  <div class="actions">
-    <button id="loadProducts">Atualizar ranking</button>
-  </div>
-  <div id="productStatus" class="status" role="status">Toque em “Atualizar ranking” para carregar os produtos.</div>
-  <div id="products" class="products"></div>
+<section class="panel">
+<h2>🔎 Ranking de produtos</h2>
+<p class="muted">Escolha um produto do ranking para criar um vídeo promocional.</p>
+<div class="filters">
+<div><label for="search">Buscar produto</label><input id="search" placeholder="Nome do produto"></div>
+<div><label for="minSales">Vendas mínimas</label><input id="minSales" type="number" min="0" value="0"></div>
+<div><label for="minCommission">Comissão mínima (R$)</label><input id="minCommission" type="number" min="0" step=".01" value="0"></div>
+<div><label for="maxPrice">Preço máximo (R$)</label><input id="maxPrice" type="number" min="0" step=".01" placeholder="Sem limite"></div>
+<div><label for="sort">Ordenar por</label><select id="sort"><option value="sales">Mais vendidos</option><option value="commission">Maior taxa de comissão</option><option value="commissionValue">Maior comissão em R$</option><option value="price">Menor preço</option><option value="rating">Melhor avaliação</option></select></div>
+</div>
+<div class="actions">
+<button id="loadProducts">🔄 Atualizar ranking</button>
+<button id="clearFilters" class="secondary">Limpar filtros</button>
+</div>
+<div id="rankingStatus" class="status">Carregando produtos...</div>
+<p id="productCount" class="muted"></p>
+<div id="products" class="products"></div>
 </section>
 
-<section id="criador" class="panel">
-  <h2>🎬 Criador de vídeos de produtos</h2>
-  <p class="muted">Monte um vídeo vertical com animação de zoom, textos e música opcional. Não precisa de vídeos do Pexels.</p>
-
-  <div class="creator-grid">
-    <div>
-      <div class="notice" id="selectedProduct">Nenhum produto selecionado. Você pode escolher um no ranking ou enviar uma foto.</div>
-      <label for="photoFile">Foto do produto (opcional)</label>
-      <input id="photoFile" type="file" accept="image/*">
-
-      <label for="videoTitle">Título do vídeo</label>
-      <input id="videoTitle" maxlength="90" value="OFERTA IMPERDÍVEL!">
-
-      <label for="videoSubtitle">Texto de destaque</label>
-      <input id="videoSubtitle" maxlength="100" value="Confira essa oportunidade">
-
-      <label for="videoCTA">Chamada final</label>
-      <input id="videoCTA" maxlength="70" value="Clique e confira!">
-
-      <label for="narrationText">Texto para narração (opcional)</label>
-      <textarea id="narrationText" rows="4" maxlength="600" placeholder="Ex.: Olha essa oferta! Um produto que vale a pena conhecer. Confira os detalhes no link."></textarea>
-
-      <label for="voiceSelect">Voz para narração por IA</label>
-      <select id="voiceSelect">
-        <option value="">Carregar vozes disponíveis...</option>
-      </select>
-      <div class="actions">
-        <button id="loadVoices" class="secondary">Carregar vozes</button>
-        <button id="makeNarration" class="secondary">Gerar narração</button>
-      </div>
-      <div id="narrationStatus" class="status" role="status"></div>
-
-      <label for="voiceFile">Ou usar uma narração gravada (opcional)</label>
-      <input id="voiceFile" type="file" accept="audio/*">
-
-      <label for="musicFile">Música de fundo (opcional)</label>
-      <input id="musicFile" type="file" accept="audio/*">
-
-      <label for="musicVolume">Volume da música</label>
-      <input id="musicVolume" type="range" min="0" max="0.3" step="0.01" value="0.08">
-
-      <label for="voiceVolume">Volume da narração</label>
-      <input id="voiceVolume" type="range" min="0" max="1" step="0.05" value="1">
-
-      <div class="actions">
-        <button id="generateVideo">Gerar vídeo de 15 segundos</button>
-        <button id="stopVideo" class="secondary" disabled>Parar</button>
-      </div>
-      <div id="creatorStatus" class="status" role="status">Escolha uma foto ou selecione um produto no ranking.</div>
-      <div id="downloadArea" class="actions"></div>
-    </div>
-
-    <div>
-      <h3>Prévia vertical 9:16</h3>
-      <div class="preview-wrap">
-        <canvas id="previewCanvas" width="360" height="640"></canvas>
-      </div>
-      <p class="muted">A prévia usa uma animação gráfica e os textos definidos à esquerda. O arquivo final depende dos formatos de gravação aceitos pelo seu navegador.</p>
-      <video id="resultPreview" controls playsinline style="width:100%;margin-top:12px;border-radius:10px;display:none"></video>
-    </div>
-  </div>
+<section class="panel">
+<h2>🎞️ Biblioteca de vídeos Pexels</h2>
+<p class="muted">Pesquise vídeos relacionados ao produto e escolha você mesmo o clipe. Os vídeos são sugestões de apoio visual e podem não mostrar exatamente o produto anunciado.</p>
+<div class="filters">
+<div style="grid-column:span 2"><label for="pexelsQuery">Tema para buscar vídeos</label><input id="pexelsQuery" placeholder="Ex.: sneakers, shoes, fashion, kitchen"></div>
+<div><label for="pexelsOrientation">Formato</label><select id="pexelsOrientation"><option value="portrait">Vertical (recomendado)</option><option value="landscape">Horizontal</option><option value="square">Quadrado</option></select></div>
+</div>
+<div class="actions">
+<button id="searchPexels">🔍 Buscar vídeos</button>
+<a class="button light" href="https://www.pexels.com/videos/" target="_blank" rel="noopener noreferrer">Abrir Pexels</a>
+</div>
+<div id="pexelsStatus" class="status">Escolha um produto no ranking e depois busque vídeos relacionados.</div>
+<div id="videoResults" class="video-results"></div>
+<p class="credit">Biblioteca: <a href="https://www.pexels.com/" target="_blank" rel="noopener noreferrer">Pexels</a>. Ao usar um clipe, mantenha o crédito do criador quando disponível. Verifique os termos e não sugira que pessoas ou marcas do vídeo endossam o produto.</p>
 </section>
 
-<p class="muted">Dica: use apenas fotos, músicas e áudios que você tenha autorização para utilizar.</p>
+<section class="panel">
+<h2>🎬 Criador de vídeo dinâmico — 15 segundos</h2>
+<p class="muted">Movimentos de câmera, produto em destaque, preço animado, vídeo de fundo opcional, música e narração.</p>
+<div id="selectedSummary" class="summary">Escolha um produto no ranking.</div>
+<div class="video-layout">
+<div>
+<div class="preview-wrap"><div class="preview"><canvas id="videoCanvas" width="720" height="1280"></canvas></div></div>
+<p class="small">Prévia vertical 9:16. A gravação final dura 15 segundos.</p>
+</div>
+<div>
+<label for="voiceSelect">Voz da narração</label>
+<select id="voiceSelect"><option value="">Carregando vozes...</option></select>
+<div style="margin-top:12px">
+<label for="narrationText">Texto da narração</label>
+<textarea id="narrationText" maxlength="1200" placeholder="Selecione um produto para sugerir o texto."></textarea>
+<p class="small">Prefira uma narração curta para caber nos 15 segundos.</p>
+</div>
+<div style="margin-top:12px">
+<label for="musicFile">🎵 Música de fundo (opcional)</label>
+<input id="musicFile" type="file" accept="audio/*">
+<p id="musicStatus" class="small">Selecione um áudio do celular. Use música que você tenha autorização para publicar.</p>
+<label for="musicVolume">Volume da música</label>
+<input id="musicVolume" type="range" min="0" max="35" value="14">
+<p class="small">A narração ficará mais alta que a música. O áudio selecionado é usado localmente.</p>
+</div>
+<div class="actions">
+<button id="generateAudio">🗣️ Gerar narração</button>
+<button id="playAudio" class="secondary" disabled>▶️ Ouvir narração</button>
+</div>
+<audio id="audioPlayer" controls class="hidden"></audio>
+<div class="actions">
+<button id="generateVideo" class="green">✨ Gerar vídeo de 15 segundos</button>
+<button id="downloadVideo" class="secondary" disabled>⬇️ Salvar vídeo</button>
+<button id="shareVideo" class="light" disabled>📤 Compartilhar</button>
+</div>
+<div id="creatorStatus" class="status">Selecione um produto para começar.</div>
+<p class="small">A gravação depende do suporte do navegador. O arquivo pode ser MP4 ou WebM. Para compor o vídeo com um clipe Pexels, o navegador precisa permitir a leitura do vídeo no canvas.</p>
+</div>
+</div>
+</section>
 </main>
 
 <script>
 "use strict";
+const $=id=>document.getElementById(id),canvas=$("videoCanvas"),ctx=canvas.getContext("2d");
+let allProducts=[],filteredProducts=[],selectedProduct=null,currentImage=null,narrationBlob=null,narrationUrl=null,videoBlob=null,videoUrl=null,videoMime="",previewStart=performance.now(),previewAnimationId=null,isGenerating=false,selectedStockVideo=null,stockVideoElement=null;
 
-const $ = id => document.getElementById(id);
-let allProducts = [];
-let chosenProduct = null;
-let productImage = null;
-let narrationBlob = null;
-let activeRecorder = null;
-let animationFrame = null;
-let stopRequested = false;
-let currentVideoUrl = null;
+function status(id,msg,type=""){ $(id).textContent=msg;$(id).className="status"+(type?" "+type:""); }
+function num(v){const n=Number(v);return Number.isFinite(n)?n:0}
+function money(v){return num(v).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function nameOf(p){return String(p?.productName||p?.name||"Produto Shopee")}
+function imageOf(p){return String(p?.imageUrl||p?.image||p?.image_url||"")}
+function priceOf(p){return num(p?.priceMin??p?.price??p?.priceMax)}
+function commissionOf(p){const c=num(p?.commission);if(c>0)return c;const r=num(p?.commissionRate);return priceOf(p)*(r>1?r/100:r)}
+function commissionRate(p){const r=num(p?.commissionRate);return r?(r<=1?r*100:r).toLocaleString("pt-BR",{maximumFractionDigits:2})+"%":"—"}
+function imageProxy(url){return "/api/imagem?url="+encodeURIComponent(url)}
+function offerOf(p){return String(p?.offerLink||p?.productLink||p?.url||"")}
+function shopeeSearchOf(p){return "https://shopee.com.br/search?keyword="+encodeURIComponent(nameOf(p))}
 
-function setStatus(id, message) {
-  $(id).textContent = message;
-}
-
-function asNumber(value) {
-  if (value === null || value === undefined || value === "") return 0;
-  if (typeof value === "number") return value;
-  const cleaned = String(value).replace(/[R$\s]/g, "").replace(/\.(?=\d{3}(?:\D|$))/g, "").replace(",", ".");
-  const n = Number(cleaned.replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? n : 0;
-}
-
-function money(value) {
-  const n = asNumber(value);
-  return n.toLocaleString("pt-BR", {style:"currency",currency:"BRL"});
-}
-
-function productName(p) {
-  return p.name || p.title || p.productName || p.product_name || "Produto sem nome";
-}
-function productPrice(p) {
-  return p.priceMin ?? p.price_min ?? p.price ?? p.priceMax ?? p.price_max ?? p.priceMinValue ?? 0;
-}
-function productSales(p) {
-  return asNumber(p.sales ?? p.sold ?? p.salesVolume ?? p.sales_volume ?? p.sold_count ?? 0);
-}
-function productCommission(p) {
-  const direct = p.commission ?? p.commissionValue ?? p.commission_value ?? p.estimatedCommission ?? p.estimated_commission;
-  if (direct !== undefined && direct !== null && direct !== "") return asNumber(direct);
-  const rate = asNumber(p.commissionRate ?? p.commission_rate ?? p.rate ?? 0);
-  const price = asNumber(productPrice(p));
-  return rate > 1 ? price * rate / 100 : price * rate;
-}
-function productRating(p) {
-  return asNumber(p.rating ?? p.itemRating ?? p.item_rating ?? p.score ?? 0);
-}
-function productDiscount(p) {
-  return asNumber(p.discount ?? p.discountRate ?? p.discount_rate ?? 0);
-}
-function productImageUrl(p) {
-  return p.image || p.imageUrl || p.image_url || p.cover || p.coverImage || p.cover_image || p.itemImage || p.item_image || "";
-}
-function productLink(p) {
-  return p.productLink || p.product_link || p.offerLink || p.offer_link || p.link || p.url || "";
-}
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[c]);
+async function loadProducts(){
+$("loadProducts").disabled=true;
+status("rankingStatus","Buscando produtos da Shopee...");
+try{
+const r=await fetch("/api/produtos",{cache:"no-store"}),d=await r.json();
+if(!r.ok||d.success===false)throw Error(d.error||"Erro ao carregar ranking.");
+allProducts=Array.isArray(d.produtos)?d.produtos:[];
+if(!allProducts.length)throw Error("Nenhum produto foi retornado pela API.");
+applyFilters();
+status("rankingStatus","Ranking atualizado: "+allProducts.length+" produtos recebidos.","success")
+}catch(e){status("rankingStatus","Erro ao carregar produtos: "+e.message,"error")}
+finally{$("loadProducts").disabled=false}
 }
 
-function extractProducts(data) {
-  if (Array.isArray(data)) return data;
-  const candidates = [
-    data?.products, data?.produtos, data?.items, data?.data,
-    data?.result?.products, data?.result?.items,
-    data?.data?.products, data?.data?.items,
-    data?.data?.productOfferV2?.nodes,
-    data?.productOfferV2?.nodes
-  ];
-  for (const item of candidates) {
-    if (Array.isArray(item)) return item;
-    if (item && Array.isArray(item.nodes)) return item.nodes;
-  }
-  return [];
+function applyFilters(){
+const term=$("search").value.trim().toLowerCase(),salesMin=num($("minSales").value),commissionMin=num($("minCommission").value),maxPrice=$("maxPrice").value===""?Infinity:num($("maxPrice").value);
+filteredProducts=allProducts.filter(p=>nameOf(p).toLowerCase().includes(term)&&num(p.sales)>=salesMin&&commissionOf(p)>=commissionMin&&priceOf(p)<=maxPrice);
+const sort=$("sort").value;
+filteredProducts.sort((a,b)=>sort==="commission"?num(b.commissionRate)-num(a.commissionRate):sort==="commissionValue"?commissionOf(b)-commissionOf(a):sort==="price"?priceOf(a)-priceOf(b):sort==="rating"?num(b.ratingStar)-num(a.ratingStar):num(b.sales)-num(a.sales));
+renderProducts()
 }
 
-async function fetchProductImage(url) {
-  if (!url) throw new Error("Este produto não possui endereço de imagem.");
-  const proxy = "/api/imagem?url=" + encodeURIComponent(url);
-  const response = await fetch(proxy);
-  if (!response.ok) throw new Error("Não foi possível carregar a foto do produto.");
-  const blob = await response.blob();
-  return await createImageBitmap(blob);
+function renderProducts(){
+const c=$("products");
+c.replaceChildren();
+$("productCount").textContent=filteredProducts.length+" produto(s) encontrados.";
+filteredProducts.forEach((p,i)=>{
+const card=document.createElement("article");
+card.className="product";
+if(selectedProduct&&String(selectedProduct.itemId)===String(p.itemId))card.classList.add("selected");
+const img=document.createElement("img");
+img.alt=nameOf(p);img.loading=i>12?"lazy":"eager";img.src=imageProxy(imageOf(p));
+img.onerror=()=>{img.onerror=null;img.alt="Imagem indisponível"};
+const title=document.createElement("div");
+title.className="product-name";title.textContent=nameOf(p);
+const price=document.createElement("div");
+price.className="price";price.textContent=money(priceOf(p));
+const meta=document.createElement("div");
+meta.className="meta";
+meta.textContent="Vendas: "+num(p.sales).toLocaleString("pt-BR")+"\nComissão estimada: "+money(commissionOf(p))+"\nTaxa: "+commissionRate(p)+"\nAvaliação: "+(num(p.ratingStar)||"—");
+const choose=document.createElement("button");
+choose.textContent="🎬 Escolher para o vídeo";
+choose.addEventListener("click",()=>chooseProduct(p));
+card.append(img,title,price,meta,choose);
+
+/* BOTÃO RESTAURADO: usa o link de oferta, ou pesquisa o produto na Shopee. */
+const link=offerOf(p);
+const a=document.createElement("a");
+a.className="button light";
+a.href=link||shopeeSearchOf(p);
+a.target="_blank";
+a.rel="noopener noreferrer";
+a.textContent=link?"🛒 Ir diretamente para a Shopee":"🔎 Buscar na Shopee";
+card.append(a);
+c.append(card)
+})
 }
 
-function renderProducts() {
-  const search = $("searchProduct").value.trim().toLowerCase();
-  const sort = $("sortProducts").value;
-  const filtered = allProducts.filter(p => productName(p).toLowerCase().includes(search));
-  const sortFns = {
-    commission:(a,b) => productCommission(b)-productCommission(a),
-    sales:(a,b) => productSales(b)-productSales(a),
-    price:(a,b) => asNumber(productPrice(a))-asNumber(productPrice(b)),
-    rating:(a,b) => productRating(b)-productRating(a),
-    discount:(a,b) => productDiscount(b)-productDiscount(a)
-  };
-  filtered.sort(sortFns[sort] || sortFns.commission);
-  const container = $("products");
-  container.innerHTML = "";
+function suggestedText(p){return "Olha esse achadinho! "+nameOf(p)+". O preço começa em "+money(priceOf(p))+". Confira os detalhes e veja se essa oferta combina com você. Acesse o link do produto!"}
 
-  if (!filtered.length) {
-    container.innerHTML = '<p class="muted">Nenhum produto encontrado com essa busca.</p>';
-    return;
-  }
-
-  for (const p of filtered) {
-    const image = productImageUrl(p);
-    const price = productPrice(p);
-    const commission = productCommission(p);
-    const card = document.createElement("article");
-    card.className = "product";
-    card.innerHTML = `
-      <img alt="Foto do produto" loading="lazy">
-      <div class="product-body">
-        <div class="product-name">${escapeHtml(productName(p))}</div>
-        <div class="price">${money(price)}</div>
-        <div class="meta">Comissão estimada: <strong>${money(commission)}</strong><br>
-        Vendas: ${productSales(p).toLocaleString("pt-BR")}<br>
-        Avaliação: ${productRating(p) || "—"}<br>
-        Desconto: ${productDiscount(p) || "—"}${productDiscount(p) ? "%" : ""}</div>
-        <button type="button">Criar vídeo deste produto</button>
-      </div>`;
-    const img = card.querySelector("img");
-    if (image) {
-      img.src = image;
-      img.onerror = () => {
-        if (!img.dataset.proxyTried) {
-          img.dataset.proxyTried = "1";
-          img.src = "/api/imagem?url=" + encodeURIComponent(image);
-        } else {
-          img.alt = "Imagem indisponível";
-        }
-      };
-    } else {
-      img.alt = "Produto sem imagem";
-    }
-    card.querySelector("button").addEventListener("click", () => chooseProduct(p));
-    container.appendChild(card);
-  }
+function chooseProduct(p){
+selectedProduct=p;narrationBlob=null;videoBlob=null;
+if(narrationUrl)URL.revokeObjectURL(narrationUrl);
+if(videoUrl)URL.revokeObjectURL(videoUrl);
+narrationUrl=videoUrl=null;
+$("audioPlayer").removeAttribute("src");
+$("audioPlayer").classList.add("hidden");
+$("playAudio").disabled=true;
+$("downloadVideo").disabled=true;
+$("shareVideo").disabled=true;
+$("narrationText").value=suggestedText(p);
+$("selectedSummary").textContent="Produto escolhido: "+nameOf(p)+" | Preço: "+money(priceOf(p))+" | Vendas: "+num(p.sales).toLocaleString("pt-BR")+(selectedStockVideo?" | Vídeo Pexels selecionado":" | Sem vídeo Pexels selecionado");
+$("pexelsQuery").value=makeVideoQuery(nameOf(p));
+status("creatorStatus","Produto selecionado. Você pode buscar um vídeo Pexels ou gerar o anúncio com a foto do produto.");
+renderProducts();loadSelectedImage()
 }
 
-async function loadProducts() {
-  const btn = $("loadProducts");
-  btn.disabled = true;
-  setStatus("productStatus", "Carregando produtos da API...");
-  try {
-    const response = await fetch("/api/produtos", {cache:"no-store"});
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.message || data.error || `Erro HTTP ${response.status}`);
-    if (data.success === false) throw new Error(data.message || data.error || "A API informou uma falha.");
-    allProducts = extractProducts(data);
-    if (!allProducts.length) {
-      throw new Error(data.message || "A API respondeu, mas não encontrei a lista de produtos no formato esperado.");
-    }
-    renderProducts();
-    setStatus("productStatus", `${allProducts.length} produtos carregados. Escolha um produto para montar o vídeo.`);
-  } catch (error) {
-    setStatus("productStatus", "Não foi possível carregar os produtos: " + error.message + "\nO criador de vídeos continua disponível se você enviar uma foto.");
-  } finally {
-    btn.disabled = false;
-  }
+function makeVideoQuery(name){
+const n=name.toLowerCase();
+if(/sapato|tênis|tenis|sandália|sandalia|chinelo|calçado|calcado|bota/.test(n))return "shoes fashion";
+if(/celular|telefone|smartphone|fone|headphone|fone de ouvido/.test(n))return "technology gadgets";
+if(/cozinha|panela|air fryer|liquidificador|cafeteira/.test(n))return "kitchen home";
+if(/bolsa|mochila|carteira/.test(n))return "fashion accessories";
+if(/beleza|maquiagem|perfume|creme|cabelo/.test(n))return "beauty skincare";
+if(/casa|decoração|decoracao|luminária|luminaria|móvel|movel/.test(n))return "home interior";
+if(/brinquedo|criança|crianca|infantil/.test(n))return "toys kids";
+return name.split(/\s+/).slice(0,3).join(" ")
 }
 
-async function chooseProduct(p) {
-  chosenProduct = p;
-  $("selectedProduct").textContent = "Produto selecionado: " + productName(p);
-  $("videoTitle").value = productName(p).slice(0,90);
-  $("videoSubtitle").value = `Por apenas ${money(productPrice(p))}`;
-  $("narrationText").value = `Olha essa oferta! ${productName(p)} por ${money(productPrice(p))}. Confira os detalhes e veja se vale a pena para você.`;
-  setStatus("creatorStatus", "Carregando a foto do produto...");
-  try {
-    productImage = await fetchProductImage(productImageUrl(p));
-    drawPreview(0);
-    setStatus("creatorStatus", "Foto carregada. Você já pode gerar seu vídeo.");
-  } catch (error) {
-    productImage = null;
-    setStatus("creatorStatus", error.message + " Você pode enviar a foto manualmente.");
-  }
-  $("criador").scrollIntoView({behavior:"smooth"});
+function loadSelectedImage(){
+if(!selectedProduct)return;
+const url=imageOf(selectedProduct);
+if(!url){currentImage=null;drawPlaceholder();status("creatorStatus","Este produto não tem imagem disponível.","error");return}
+const img=new Image();
+img.onload=()=>{currentImage=img;previewStart=performance.now();startPreview()};
+img.onerror=()=>{currentImage=null;drawPlaceholder();status("creatorStatus","Não foi possível carregar a foto. Escolha outro produto.","error")};
+img.src=imageProxy(url)
 }
 
-$("photoFile").addEventListener("change", async event => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-  try {
-    productImage = await createImageBitmap(file);
-    chosenProduct = null;
-    $("selectedProduct").textContent = "Foto enviada: " + file.name;
-    drawPreview(0);
-    setStatus("creatorStatus", "Foto carregada com sucesso.");
-  } catch {
-    setStatus("creatorStatus", "Não consegui abrir essa foto. Tente uma imagem JPG ou PNG.");
-  }
+async function loadVoices(){
+try{
+const r=await fetch("/api/voz/vozes"),d=await r.json();
+if(!r.ok||d.success===false)throw Error(d.error||"Falha nas vozes.");
+const s=$("voiceSelect");s.replaceChildren();
+if(!d.vozes?.length){s.add(new Option("Nenhuma voz disponível",""));return}
+d.vozes.forEach((v,i)=>s.add(new Option(v.name||("Voz "+(i+1)),v.voice_id)))
+}catch(e){$("voiceSelect").replaceChildren(new Option("Erro ao carregar vozes",""));status("creatorStatus","Erro ao carregar vozes: "+e.message,"error")}
+}
+
+async function generateNarration(){
+if(!selectedProduct){status("creatorStatus","Escolha um produto primeiro.","error");return false}
+const text=$("narrationText").value.trim(),voice=$("voiceSelect").value;
+if(!text||!voice){status("creatorStatus","Digite a narração e selecione uma voz.","error");return false}
+$("generateAudio").disabled=true;$("generateVideo").disabled=true;
+status("creatorStatus","Gerando narração com a ElevenLabs...");
+try{
+const r=await fetch("/api/voz/narrar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({texto:text,voice_id:voice})});
+if(!r.ok){let m="Falha ao gerar áudio.";try{m=(await r.json()).error||m}catch(_){}throw Error(m)}
+narrationBlob=await r.blob();
+if(!narrationBlob.size)throw Error("O áudio retornou vazio.");
+if(narrationUrl)URL.revokeObjectURL(narrationUrl);
+narrationUrl=URL.createObjectURL(narrationBlob);
+$("audioPlayer").src=narrationUrl;$("audioPlayer").classList.remove("hidden");$("playAudio").disabled=false;
+status("creatorStatus","Narração pronta. Agora você pode gerar o vídeo.","success");return true
+}catch(e){status("creatorStatus","Erro na narração: "+e.message,"error");return false}
+finally{$("generateAudio").disabled=false;$("generateVideo").disabled=false}
+}
+
+$("musicFile").addEventListener("change",()=>{
+const f=$("musicFile").files?.[0];
+if(!f){$("musicStatus").textContent="Nenhuma música selecionada.";return}
+if(!f.type.startsWith("audio/")){status("creatorStatus","Escolha um arquivo de áudio válido.","error");$("musicFile").value="";return}
+if(f.size>25*1024*1024){status("creatorStatus","Escolha um áudio de até 25 MB.","error");$("musicFile").value="";return}
+$("musicStatus").textContent="Música selecionada: "+f.name+". Será misturada ao vídeo."
 });
 
-$("searchProduct").addEventListener("input", renderProducts);
-$("sortProducts").addEventListener("change", renderProducts);
-$("loadProducts").addEventListener("click", loadProducts);
-
-async function loadVoices() {
-  const select = $("voiceSelect");
-  setStatus("narrationStatus", "Buscando vozes disponíveis...");
-  try {
-    const response = await fetch("/api/voz/vozes", {cache:"no-store"});
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.message || data.error || `Erro HTTP ${response.status}`);
-    const voices = data.voices || data.vozes || data.data?.voices || data.data?.vozes || data.items || [];
-    select.innerHTML = '<option value="">Voz padrão</option>';
-    if (Array.isArray(voices)) {
-      voices.forEach(v => {
-        const opt = document.createElement("option");
-        opt.value = v.voice_id || v.voiceId || v.id || v.value || "";
-        opt.textContent = v.name || v.label || v.voice_id || v.id || "Voz";
-        select.appendChild(opt);
-      });
-    }
-    setStatus("narrationStatus", voices.length ? `${voices.length} vozes carregadas.` : "O serviço respondeu, mas não listou vozes. Você ainda pode tentar gerar com a voz padrão.");
-  } catch (error) {
-    setStatus("narrationStatus", "Não consegui carregar as vozes: " + error.message + ". Você pode gerar o vídeo sem narração.");
-  }
+async function searchPexels(){
+const q=$("pexelsQuery").value.trim();
+if(!q){status("pexelsStatus","Digite um tema para buscar vídeos.","error");return}
+$("searchPexels").disabled=true;$("videoResults").replaceChildren();
+status("pexelsStatus","Buscando vídeos no Pexels...");
+try{
+const r=await fetch("/api/videos/pexels?q="+encodeURIComponent(q)+"&per_page=8&orientation="+encodeURIComponent($("pexelsOrientation").value));
+const d=await r.json();
+if(!r.ok||!d.success){
+if(d.code==="PEXELS_KEY_MISSING")throw Error("A chave PEXELS_API_KEY ainda não está configurada no Render. Se você já possui uma chave, adicione-a nas variáveis de ambiente.");
+throw Error(d.error||"Falha na busca.")
 }
-
-async function makeNarration() {
-  const texto = $("narrationText").value.trim();
-  if (!texto) {
-    setStatus("narrationStatus", "Digite o texto que deseja narrar.");
-    return;
-  }
-  const btn = $("makeNarration");
-  btn.disabled = true;
-  setStatus("narrationStatus", "Gerando narração por IA...");
-  try {
-    const response = await fetch("/api/voz/narrar", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({texto, text:texto, voiceId:$("voiceSelect").value, voice_id:$("voiceSelect").value})
-    });
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || err.error || `Erro HTTP ${response.status}`);
-    }
-    const type = response.headers.get("content-type") || "";
-    if (type.includes("application/json")) {
-      const data = await response.json();
-      const audioUrl = data.audioUrl || data.audio_url || data.url;
-      if (audioUrl) {
-        const audioResponse = await fetch(audioUrl);
-        if (!audioResponse.ok) throw new Error("O endereço do áudio não pôde ser aberto.");
-        narrationBlob = await audioResponse.blob();
-      } else if (data.audioBase64 || data.audio_base64) {
-        const raw = atob(data.audioBase64 || data.audio_base64);
-        const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
-        narrationBlob = new Blob([bytes], {type:"audio/mpeg"});
-      } else {
-        throw new Error(data.message || "A resposta não trouxe um arquivo de áudio reconhecido.");
-      }
-    } else {
-      narrationBlob = await response.blob();
-    }
-    setStatus("narrationStatus", "Narração pronta! Ela será incluída no vídeo.");
-  } catch (error) {
-    narrationBlob = null;
-    setStatus("narrationStatus", "Não foi possível gerar a narração: " + error.message + "\nVerifique a configuração do serviço de voz. O vídeo pode ser gerado sem ela.");
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-$("loadVoices").addEventListener("click", loadVoices);
-$("makeNarration").addEventListener("click", makeNarration);
-$("voiceFile").addEventListener("change", async event => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-  narrationBlob = file;
-  setStatus("narrationStatus", "Áudio de narração carregado: " + file.name);
+if(!d.videos.length){status("pexelsStatus","Nenhum vídeo encontrado. Tente palavras mais gerais em inglês, como shoes, fashion, home ou beauty.");return}
+const container=$("videoResults");
+d.videos.forEach(v=>{
+const card=document.createElement("article");card.className="video-card";
+if(selectedStockVideo?.id===v.id)card.classList.add("selected-video");
+const video=document.createElement("video");
+video.src=v.video_file;video.poster=v.image;video.controls=true;video.preload="metadata";video.playsInline=true;video.crossOrigin="anonymous";video.muted=true;video.setAttribute("webkit-playsinline","true");
+const desc=document.createElement("p");desc.textContent="Duração: "+v.duration+" s · Criador: "+v.photographer;
+const choose=document.createElement("button");
+choose.textContent=selectedStockVideo?.id===v.id?"✓ Vídeo selecionado":"Usar este vídeo";
+choose.addEventListener("click",()=>selectStockVideo(v));
+const credit=document.createElement("div");credit.className="credit";
+const link=document.createElement("a");link.href=v.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Ver no Pexels";
+credit.append("Crédito: "+v.photographer+" · ",link);
+card.append(video,desc,choose,credit);container.append(card)
 });
-
-const canvas = $("previewCanvas");
-const ctx = canvas.getContext("2d");
-
-function drawCover(img, t) {
-  const w = canvas.width, h = canvas.height;
-  const zoom = 1.02 + 0.12 * (0.5 + 0.5 * Math.sin(t * Math.PI * 2));
-  const iw = img.width || img.videoWidth, ih = img.height || img.videoHeight;
-  if (!iw || !ih) return;
-  const scale = Math.max(w / iw, h / ih) * zoom;
-  const dw = iw * scale, dh = ih * scale;
-  const dx = (w-dw)/2, dy = (h-dh)/2;
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(0,0,w,h);
-  ctx.clip();
-  ctx.drawImage(img,dx,dy,dw,dh);
-  ctx.restore();
+status("pexelsStatus",d.videos.length+" vídeos encontrados. Assista às prévias e toque em ‘Usar este vídeo’ para escolher.","success")
+}catch(e){status("pexelsStatus",e.message,"error")}
+finally{$("searchPexels").disabled=false}
 }
 
-function wrapText(text, maxWidth) {
-  const words = String(text || "").split(/\s+/);
-  const lines = [];
-  let line = "";
-  for (const word of words) {
-    const next = line ? line + " " + word : word;
-    if (ctx.measureText(next).width > maxWidth && line) {
-      lines.push(line);
-      line = word;
-    } else line = next;
-  }
-  if (line) lines.push(line);
-  return lines;
+function selectStockVideo(v){
+selectedStockVideo=v;
+if(stockVideoElement){stockVideoElement.pause();stockVideoElement.removeAttribute("src");stockVideoElement.load()}
+stockVideoElement=document.createElement("video");
+stockVideoElement.crossOrigin="anonymous";stockVideoElement.src=v.video_file;stockVideoElement.muted=true;stockVideoElement.loop=true;stockVideoElement.playsInline=true;stockVideoElement.preload="auto";
+stockVideoElement.addEventListener("error",()=>status("creatorStatus","O vídeo selecionado não pôde ser carregado no criador. Tente outro clipe ou use o vídeo do Pexels fora do criador.","error"),{once:true});
+stockVideoElement.addEventListener("loadeddata",()=>{stockVideoElement.play().catch(()=>{});previewStart=performance.now();startPreview();status("creatorStatus","Vídeo Pexels selecionado por "+v.photographer+". Ele será usado como fundo se o navegador permitir a composição.","success")},{once:true});
+stockVideoElement.load();
+$("selectedSummary").textContent="Produto: "+(selectedProduct?nameOf(selectedProduct):"não selecionado")+" | "+money(priceOf(selectedProduct))+" | Vídeo Pexels por "+v.photographer;
+document.querySelectorAll(".video-card").forEach(card=>{const b=card.querySelector("button");if(b){b.textContent="Usar este vídeo";card.classList.remove("selected-video")}});
+const found=[...document.querySelectorAll(".video-card")].find(card=>card.querySelector("a")?.href===v.url);
+if(found){found.classList.add("selected-video");found.querySelector("button").textContent="✓ Vídeo selecionado"}
 }
 
-function drawPreview(t=0) {
-  const w=canvas.width,h=canvas.height;
-  const grad=ctx.createLinearGradient(0,0,w,h);
-  grad.addColorStop(0,"#27123d");
-  grad.addColorStop(.55,"#142a4c");
-  grad.addColorStop(1,"#05070c");
-  ctx.fillStyle=grad;
-  ctx.fillRect(0,0,w,h);
-
-  if (productImage) {
-    drawCover(productImage,t);
-    ctx.fillStyle="rgba(5,7,16,.42)";
-    ctx.fillRect(0,0,w,h);
-  } else {
-    ctx.fillStyle="rgba(255,107,53,.16)";
-    ctx.beginPath();
-    ctx.arc(w*(.25+.08*Math.sin(t*5)),h*.42,130,0,Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle="#fff";
-    ctx.font="bold 80px Arial";
-    ctx.textAlign="center";
-    ctx.fillText("OFERTA",w/2,h*.47);
-  }
-
-  const title=$("videoTitle").value.trim();
-  const subtitle=$("videoSubtitle").value.trim();
-  const cta=$("videoCTA").value.trim();
-
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-  ctx.font="bold 27px Arial";
-  const titleLines=wrapText(title,310).slice(0,3);
-  const titleY=85;
-  titleLines.forEach((line,i)=>{
-    ctx.lineWidth=5;ctx.strokeStyle="rgba(0,0,0,.85)";
-    ctx.strokeText(line,w/2,titleY+i*34);
-    ctx.fillStyle="#fff";ctx.fillText(line,w/2,titleY+i*34);
-  });
-
-  if (subtitle) {
-    ctx.font="bold 22px Arial";
-    const lines=wrapText(subtitle,310).slice(0,3);
-    const y=h-160-lines.length*27;
-    lines.forEach((line,i)=>{
-      ctx.fillStyle="#ff6b35";
-      ctx.fillRect(15,y+i*30-16,w-30,29);
-      ctx.fillStyle="#fff";
-      ctx.fillText(line,w/2,y+i*30);
-    });
-  }
-
-  if (cta) {
-    ctx.fillStyle="#ff6b35";
-    ctx.beginPath();
-    ctx.roundRect(28,h-76,w-56,49,12);
-    ctx.fill();
-    ctx.fillStyle="#fff";
-    ctx.font="bold 20px Arial";
-    ctx.fillText(cta.slice(0,55),w/2,h-51);
-  }
+function drawPlaceholder(){
+ctx.fillStyle="#251b19";ctx.fillRect(0,0,720,1280);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 42px Arial";ctx.fillText("ESCOLHA UM",360,570);ctx.fillText("PRODUTO",360,630);ctx.font="26px Arial";ctx.fillText("Seu vídeo aparecerá aqui",360,690)
+}
+function roundRect(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r)}
+function wrap(c,text,maxWidth,maxLines){
+const words=String(text).split(/\s+/),lines=[];let line="";
+for(const word of words){const test=line?line+" "+word:word;if(c.measureText(test).width>maxWidth&&line){lines.push(line);line=word;if(lines.length>=maxLines)break}else line=test}
+if(line&&lines.length<maxLines)lines.push(line);
+if(lines.length===maxLines&&words.join(" ").length>lines.join(" ").length){let last=lines[lines.length-1];while(last.length&&c.measureText(last+"…").width>maxWidth)last=last.slice(0,-1);lines[lines.length-1]=last+"…"}
+return lines
 }
 
-["videoTitle","videoSubtitle","videoCTA"].forEach(id=>{
-  $(id).addEventListener("input",()=>drawPreview(0));
-});
-
-function chooseMimeType() {
-  if (!window.MediaRecorder) return "";
-  const options=[
-    "video/mp4;codecs=h264,aac",
-    "video/webm;codecs=vp9,opus",
-    "video/webm;codecs=vp8,opus",
-    "video/webm"
-  ];
-  return options.find(t=>MediaRecorder.isTypeSupported(t)) || "";
+function drawFrame(t){
+const W=720,H=1280,scene=Math.min(3,Math.floor(t/3.75)),local=(t%3.75)/3.75;
+const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,scene%2?"#341a16":"#661f17");bg.addColorStop(.55,"#b83320");bg.addColorStop(1,"#ff7445");
+ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+if(selectedStockVideo&&stockVideoElement&&stockVideoElement.readyState>=2){try{const vw=stockVideoElement.videoWidth||720,vh=stockVideoElement.videoHeight||1280,scale=Math.max(W/vw,H/vh),dw=vw*scale,dh=vh*scale;ctx.drawImage(stockVideoElement,(W-dw)/2,(H-dh)/2,dw,dh);ctx.fillStyle="rgba(45,10,5,.56)";ctx.fillRect(0,0,W,H)}catch(e){}}
+for(let i=0;i<20;i++){const x=(i*137+t*(70+(i%4)*20))%(W+50)-25,y=(i*211+t*(i%2?45:-25)+H)%H;ctx.fillStyle=i%3===0?"rgba(255,220,120,.55)":"rgba(255,255,255,.2)";ctx.beginPath();ctx.arc(x,y,2+(i%3),0,Math.PI*2);ctx.fill()}
+ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="bold 34px Arial";ctx.fillText(["ACHADINHO DO DIA!","OLHA ESSA OFERTA!","PREÇO EM DESTAQUE!","CONFIRA AGORA!"][scene],360,82);
+const bx=45,by=145,bw=630,bh=650;ctx.save();ctx.shadowColor="rgba(0,0,0,.35)";ctx.shadowBlur=25;roundRect(ctx,bx,by,bw,bh,30);ctx.fillStyle="#fff";ctx.fill();ctx.restore();ctx.save();roundRect(ctx,bx,by,bw,bh,30);ctx.clip();
+if(currentImage){const iw=currentImage.naturalWidth||currentImage.width,ih=currentImage.naturalHeight||currentImage.height,base=Math.max(bw/iw,bh/ih),zoom=scene===0?1.02+local*.26:scene===1?1.22+.06*Math.sin(local*6.28):scene===2?1.08+local*.19:1.28-local*.18,panX=scene===0?(1-local)*18:scene===1?Math.sin(local*6.28)*22:scene===2?-25+local*50:Math.sin(local*6.28)*12,panY=scene===1?Math.cos(local*6.28)*10:Math.sin(local*Math.PI)*12,scale=base*zoom,dw=iw*scale,dh=ih*scale;ctx.drawImage(currentImage,bx+(bw-dw)/2+panX,by+(bh-dh)/2+panY,dw,dh)}else{ctx.fillStyle="#eee";ctx.fillRect(bx,by,bw,bh)}
+ctx.restore();
+ctx.save();ctx.translate(360,828+Math.sin(t*7)*5);ctx.rotate(Math.sin(t*2)*.02);roundRect(ctx,-260,-31,520,62,22);ctx.fillStyle="#ffdc45";ctx.fill();ctx.fillStyle="#382018";ctx.font="bold 25px Arial";ctx.fillText(["VEJA ESSE ACHADINHO","OFERTA PARA CONFERIR","PREÇO EM DESTAQUE","SALVE PARA VER DEPOIS"][scene],0,9);ctx.restore();
+ctx.fillStyle="#fff";ctx.font="bold 30px Arial";wrap(ctx,selectedProduct?nameOf(selectedProduct):"Escolha um produto",620,2).forEach((l,i)=>ctx.fillText(l,360,910+i*37));
+ctx.save();ctx.translate(360,1030);ctx.scale(scene===2?1+.05*Math.sin(local*Math.PI):1,scene===2?1+.05*Math.sin(local*Math.PI):1);roundRect(ctx,-255,-54,510,108,25);ctx.fillStyle="#fff";ctx.fill();ctx.fillStyle="#ee4d2d";ctx.font="bold 48px Arial";ctx.fillText(selectedProduct?money(priceOf(selectedProduct)):"Confira o preço",0,17);ctx.restore();
+ctx.fillStyle="#fff0e8";ctx.font="25px Arial";ctx.fillText(scene===3?"CONFIRA A OFERTA NO LINK":"Veja os detalhes do produto",360,1168);ctx.font="bold 24px Arial";ctx.fillStyle="#fff";ctx.fillText("SALVE  •  COMPARTILHE  •  CONFIRA",360,1224);
+if(local<.07&&t>.05){ctx.fillStyle="rgba(255,255,255,"+((.07-local)*2.5)+")";ctx.fillRect(0,0,W,H)}
 }
 
-function loadAudio(blob) {
-  return new Promise((resolve,reject)=>{
-    const audio=new Audio();
-    audio.preload="auto";
-    const url=URL.createObjectURL(blob);
-    audio.src=url;
-    audio.oncanplaythrough=()=>resolve({audio,url});
-    audio.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Não consegui abrir um dos áudios."));};
-    audio.load();
-  });
+function startPreview(){
+if(previewAnimationId)cancelAnimationFrame(previewAnimationId);
+function tick(now){drawFrame(((now-previewStart)/1000)%15);previewAnimationId=requestAnimationFrame(tick)}
+previewAnimationId=requestAnimationFrame(tick)
+}
+function chooseMime(){if(!window.MediaRecorder)return"";return["video/mp4;codecs=h264,aac","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(t=>MediaRecorder.isTypeSupported(t))||""}
+async function decodeFile(context,file){return context.decodeAudioData((await file.arrayBuffer()).slice(0))}
+
+async function generateVideo(){
+if(isGenerating)return;
+if(!selectedProduct){status("creatorStatus","Escolha um produto primeiro.","error");return}
+if(!currentImage){status("creatorStatus","Aguarde a imagem carregar.","error");return}
+if(!window.MediaRecorder||!canvas.captureStream){status("creatorStatus","Este navegador não oferece suporte à gravação. Tente um navegador atualizado.","error");return}
+const mime=chooseMime();
+if(!mime){status("creatorStatus","Não foi encontrado formato de vídeo compatível.","error");return}
+isGenerating=true;$("generateVideo").disabled=$("generateAudio").disabled=$("downloadVideo").disabled=$("shareVideo").disabled=true;
+let ac=null,recorder=null,raf=null,timer=null,cs=null,combined=null,sources=[];
+try{
+if(!narrationBlob){const ok=await generateNarration();if(!ok||!narrationBlob)throw Error("Não foi possível preparar a narração.")}
+status("creatorStatus","Preparando áudio e efeitos do vídeo...");
+const AC=window.AudioContext||window.webkitAudioContext;
+if(!AC)throw Error("Este navegador não suporta a mistura de áudio.");
+ac=new AC();await ac.resume();
+const narration=await decodeFile(ac,narrationBlob),ns=ac.createBufferSource();ns.buffer=narration;
+const ng=ac.createGain();ng.gain.value=.95;ns.connect(ng);
+const dest=ac.createMediaStreamDestination();ng.connect(dest);sources.push(ns);
+const mf=$("musicFile").files?.[0];
+if(mf){const mb=await decodeFile(ac,mf),ms=ac.createBufferSource();ms.buffer=mb;ms.loop=true;const mg=ac.createGain();mg.gain.value=num($("musicVolume").value)/100;ms.connect(mg);mg.connect(dest);sources.push(ms)}
+cs=canvas.captureStream(25);
+combined=new MediaStream([...cs.getVideoTracks(),...dest.stream.getAudioTracks()]);
+const chunks=[];
+recorder=new MediaRecorder(combined,{mimeType:mime,videoBitsPerSecond:3500000,audioBitsPerSecond:128000});
+recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
+const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=()=>reject(Error("Erro durante a gravação."))});
+drawFrame(0);recorder.start(200);sources.forEach(s=>s.start(0));
+const start=performance.now();
+function animate(now){const elapsed=Math.min(15,(now-start)/1000);drawFrame(elapsed);status("creatorStatus","Gravando vídeo: "+Math.floor(elapsed)+" de 15 segundos...");if(elapsed<15&&recorder?.state==="recording")raf=requestAnimationFrame(animate)}
+raf=requestAnimationFrame(animate);
+timer=setTimeout(()=>{if(recorder?.state==="recording")recorder.stop()},15000);
+await stopped;
+if(raf)cancelAnimationFrame(raf);if(timer)clearTimeout(timer);
+videoMime=recorder.mimeType||mime;videoBlob=new Blob(chunks,{type:videoMime});
+if(!videoBlob.size)throw Error("O arquivo de vídeo ficou vazio.");
+if(videoUrl)URL.revokeObjectURL(videoUrl);
+videoUrl=URL.createObjectURL(videoBlob);
+$("downloadVideo").disabled=$("shareVideo").disabled=false;
+status("creatorStatus","Vídeo pronto! Formato "+(videoMime.includes("mp4")?"MP4":"WebM")+" · "+(videoBlob.size/1048576).toFixed(1)+" MB.","success")
+}catch(e){console.error(e);status("creatorStatus","Erro ao gerar vídeo: "+e.message,"error")}
+finally{
+if(raf)cancelAnimationFrame(raf);if(timer)clearTimeout(timer);
+if(recorder?.state==="recording"){try{recorder.stop()}catch(_){}}
+if(combined)combined.getTracks().forEach(t=>t.stop());
+if(cs)cs.getTracks().forEach(t=>t.stop());
+if(ac)try{await ac.close()}catch(_){}
+isGenerating=false;$("generateVideo").disabled=$("generateAudio").disabled=false
+}
 }
 
-async function generateVideo() {
-  if (!productImage) {
-    setStatus("creatorStatus","Selecione um produto com foto ou envie uma imagem antes de gerar o vídeo.");
-    return;
-  }
-  if (!window.MediaRecorder || !canvas.captureStream) {
-    setStatus("creatorStatus","Este navegador não oferece a gravação de vídeo necessária. Tente abrir o projeto no Chrome ou em um computador.");
-    return;
-  }
-
-  const btn=$("generateVideo");
-  btn.disabled=true;
-  $("stopVideo").disabled=false;
-  $("downloadArea").innerHTML="";
-  $("resultPreview").style.display="none";
-  stopRequested=false;
-  setStatus("creatorStatus","Preparando vídeo. Mantenha esta página aberta até terminar...");
-
-  let audioContext=null, stream=null, musicUrl=null, voiceUrl=null;
-  let musicAudio=null, voiceAudio=null, raf=0;
-  try {
-    const tracks=[];
-    stream=canvas.captureStream(30);
-    const musicFile=$("musicFile").files?.[0];
-    const voiceFile=$("voiceFile").files?.[0];
-    const voiceBlob=voiceFile || narrationBlob;
-
-    if (musicFile || voiceBlob) {
-      const AudioContextClass=window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) {
-        audioContext=new AudioContextClass();
-        await audioContext.resume();
-        const destination=audioContext.createMediaStreamDestination();
-        const master=audioContext.createGain();
-        master.gain.value=1;
-        master.connect(destination);
-
-        if (musicFile) {
-          const loaded=await loadAudio(musicFile);
-          musicAudio=loaded.audio; musicUrl=loaded.url;
-          const source=audioContext.createMediaElementSource(musicAudio);
-          const gain=audioContext.createGain();
-          gain.gain.value=Number($("musicVolume").value);
-          source.connect(gain);gain.connect(master);
-          musicAudio.loop=true;
-        }
-        if (voiceBlob) {
-          const loaded=await loadAudio(voiceBlob);
-          voiceAudio=loaded.audio; voiceUrl=loaded.url;
-          const source=audioContext.createMediaElementSource(voiceAudio);
-          const gain=audioContext.createGain();
-          gain.gain.value=Number($("voiceVolume").value);
-          source.connect(gain);gain.connect(master);
-        }
-        destination.stream.getAudioTracks().forEach(t=>tracks.push(t));
-      }
-    }
-    tracks.forEach(track=>stream.addTrack(track));
-
-    const mimeType=chooseMimeType();
-    activeRecorder=new MediaRecorder(stream,mimeType?{mimeType}:undefined);
-    const chunks=[];
-    activeRecorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
-    const finished=new Promise((resolve,reject)=>{
-      activeRecorder.onstop=()=>resolve(new Blob(chunks,{type:activeRecorder.mimeType||"video/webm"}));
-      activeRecorder.onerror=()=>reject(new Error("O navegador encontrou um erro durante a gravação."));
-    });
-
-    let start=performance.now();
-    const duration=15000;
-    const draw=now=>{
-      const elapsed=now-start;
-      drawPreview(Math.min(1,elapsed/duration));
-      if (elapsed<duration&&!stopRequested) raf=requestAnimationFrame(draw);
-      else if (activeRecorder&&activeRecorder.state!=="inactive") activeRecorder.stop();
-    };
-
-    activeRecorder.start(500);
-    if (musicAudio) { musicAudio.currentTime=0; await musicAudio.play().catch(()=>{}); }
-    if (voiceAudio) { voiceAudio.currentTime=0; await voiceAudio.play().catch(()=>{}); }
-
-    raf=requestAnimationFrame(draw);
-    setStatus("creatorStatus","Gravando vídeo... aguarde cerca de 15 segundos.");
-    const blob=await finished;
-    cancelAnimationFrame(raf);
-    if (musicAudio) musicAudio.pause();
-    if (voiceAudio) voiceAudio.pause();
-    if (!blob.size) throw new Error("O vídeo ficou vazio. Tente novamente.");
-
-    if (currentVideoUrl) URL.revokeObjectURL(currentVideoUrl);
-    currentVideoUrl=URL.createObjectURL(blob);
-    const video=$("resultPreview");
-    video.src=currentVideoUrl;
-    video.style.display="block";
-    video.load();
-
-    const ext=blob.type.includes("mp4")?"mp4":"webm";
-    const a=document.createElement("a");
-    a.href=currentVideoUrl;
-    a.download="video-produto-shopee."+ext;
-    a.className="button";
-    a.textContent="⬇️ Baixar vídeo";
-    $("downloadArea").appendChild(a);
-
-    setStatus("creatorStatus","Vídeo gerado! Confira a prévia e toque em “Baixar vídeo”. Formato do arquivo: "+ext.toUpperCase()+".");
-  } catch(error) {
-    setStatus("creatorStatus","Não consegui gerar o vídeo: "+error.message+"\nSe estiver no iPhone, tente novamente com a página aberta e sem bloquear a tela.");
-  } finally {
-    if (musicAudio) musicAudio.pause();
-    if (voiceAudio) voiceAudio.pause();
-    if (musicUrl) URL.revokeObjectURL(musicUrl);
-    if (voiceUrl) URL.revokeObjectURL(voiceUrl);
-    if (audioContext) await audioContext.close().catch(()=>{});
-    if (stream) stream.getTracks().forEach(t=>t.stop());
-    activeRecorder=null;
-    btn.disabled=false;
-    $("stopVideo").disabled=true;
-    drawPreview(0);
-  }
+function downloadVideo(){
+if(!videoBlob||!videoUrl)return;
+const ext=videoMime.includes("mp4")?"mp4":"webm",a=document.createElement("a");
+a.href=videoUrl;a.download="shopee-video-15s."+ext;document.body.append(a);a.click();a.remove();
+status("creatorStatus","Download solicitado. Confira Downloads ou o app Arquivos.","success")
 }
 
+async function shareVideo(){
+if(!videoBlob)return;
+const ext=videoMime.includes("mp4")?"mp4":"webm",f=new File([videoBlob],"shopee-video-15s."+ext,{type:videoMime||"video/webm"});
+try{
+if(navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({title:"Vídeo de produto",text:nameOf(selectedProduct),files:[f]});status("creatorStatus","Menu de compartilhamento aberto.","success")}
+else downloadVideo()
+}catch(e){if(e.name!=="AbortError")status("creatorStatus","Não foi possível compartilhar. Tente salvar o vídeo.","error")}
+}
+
+$("loadProducts").addEventListener("click",loadProducts);
+["search","minSales","minCommission","maxPrice"].forEach(id=>$(id).addEventListener("input",applyFilters));
+$("sort").addEventListener("change",applyFilters);
+$("clearFilters").addEventListener("click",()=>{$("search").value="";$("minSales").value="0";$("minCommission").value="0";$("maxPrice").value="";$("sort").value="sales";applyFilters()});
+$("searchPexels").addEventListener("click",searchPexels);
+$("pexelsQuery").addEventListener("keydown",e=>{if(e.key==="Enter")searchPexels()});
+$("generateAudio").addEventListener("click",generateNarration);
+$("playAudio").addEventListener("click",async()=>{try{await $("audioPlayer").play()}catch(_){status("creatorStatus","Toque no controle de áudio para ouvir.","error")}});
 $("generateVideo").addEventListener("click",generateVideo);
-$("stopVideo").addEventListener("click",()=>{
-  stopRequested=true;
-  if (activeRecorder && activeRecorder.state!=="inactive") activeRecorder.stop();
-  $("stopVideo").disabled=true;
-  setStatus("creatorStatus","Solicitando parada da gravação...");
-});
-
-drawPreview(0);
-loadProducts();
+$("downloadVideo").addEventListener("click",downloadVideo);
+$("shareVideo").addEventListener("click",shareVideo);
+drawPlaceholder();loadVoices();loadProducts();
 </script>
 </body>
 </html>
